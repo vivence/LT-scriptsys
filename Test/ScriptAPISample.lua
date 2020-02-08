@@ -1,5 +1,6 @@
 
-local API = {}
+local API = {
+}
 
 function API.print( ... )
 	print(...)
