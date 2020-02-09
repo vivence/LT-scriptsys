@@ -6,15 +6,15 @@
 ScriptSigDispatcher = typesys.ScriptSigDispatcher {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	script_sig_logic = typesys.map,
-	sigs_cache = typesys.map,
-	weak_script_manager = ScriptManager,
+	_script_sig_logic = typesys.map,
+	_sigs_cache = typesys.map,
+	weak__script_manager = ScriptManager,
 }
 
 function ScriptSigDispatcher:ctor(script_manager)
-	self.script_sig_logic = typesys.new(typesys.map, type(0), ScriptSigLogic)
-	self.sigs_cache = typesys.new(typesys.map, type(0), type(true))
-	self.script_manager = script_manager
+	self._script_sig_logic = typesys.new(typesys.map, type(0), ScriptSigLogic)
+	self._sigs_cache = typesys.new(typesys.map, type(0), type(true))
+	self._script_manager = script_manager
 end
 
 function ScriptSigDispatcher:dtor()
@@ -23,25 +23,25 @@ end
 
 -- 注册脚本及其关注的信号逻辑
 function ScriptSigDispatcher:register(script, sig_logic)
-	local script_manager = self.script_manager
+	local script_manager = self._script_manager
 	assert(nil ~= script_manager)
 	local script_token = script_manager:getScriptToken(script)
-	self.script_sig_logic:set(script_token, sig_logic)
+	self._script_sig_logic:set(script_token, sig_logic)
 end
 
 -- 发送信号
 function ScriptSigDispatcher:sendSig(sig)
 	-- 先缓存信号，信号通过tick来派发
-	self.sigs_cache:set(sig, true)
+	self._sigs_cache:set(sig, true)
 end
 
 local temp_script_sig_logic = {} -- 临时table
 function ScriptSigDispatcher:tick(time, delta_time)
-	local sigs_set = self.sigs_cache
+	local sigs_set = self._sigs_cache
 	if not sigs_set:isEmpty() then
 		assert(nil == next(temp_script_sig_logic)) -- 确保临时table为空
-		local script_manager = self.script_manager
-		local script_sig_logic = self.script_sig_logic
+		local script_manager = self._script_manager
+		local script_sig_logic = self._script_sig_logic
 
 		-- 找到需要触发信号的脚本
 		for script_token, sig_logic in script_sig_logic:pairs() do
@@ -67,5 +67,5 @@ function ScriptSigDispatcher:tick(time, delta_time)
 	end
 
 	-- 清空信号缓存
-	self.sigs_cache:clear()
+	self._sigs_cache:clear()
 end

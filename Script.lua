@@ -12,10 +12,10 @@ end
 Script = typesys.Script {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	co = typesys.unmanaged,   -- 协程
-	proc = typesys.unmanaged, -- 脚本函数
-	weak_script_manager = ScriptManager,
-	weak_sig_dispatcher = ScriptSigDispatcher,
+	_co = typesys.unmanaged,   -- 协程
+	_proc = typesys.unmanaged, -- 脚本函数
+	weak__script_manager = ScriptManager,
+	weak__sig_dispatcher = ScriptSigDispatcher,
 }
 
 -- 协程proc
@@ -26,24 +26,24 @@ end
 function Script:ctor(proc, script_manager, sig_dispatcher)
 	assert(nil ~= proc and "function" == type(proc))
 	assert(nil ~= sig_dispatcher)
-	self.proc = proc
-	self.script_manager = script_manager
-	self.sig_dispatcher = sig_dispatcher
+	self._proc = proc
+	self._script_manager = script_manager
+	self._sig_dispatcher = sig_dispatcher
 end
 
 function Script:dtor()
-	self.proc = nil
-	self.sig_dispatcher = nil
+	self._proc = nil
+	self._sig_dispatcher = nil
 end
 
 -- 脚本是否处于运行状态，注意运行状态中可能是激活状态，也可能是非激活状态（等待信号）
 function Script:isRunning()
-	return nil ~= self.co
+	return nil ~= self._co
 end
 
 -- 脚本是否处于激活状态
 function Script:isActive()
-	local script_manager = self.script_manager
+	local script_manager = self._script_manager
 	assert(nil ~= script_manager)
 	return script_manager:isActiveScript(self)
 end
@@ -75,33 +75,33 @@ function Script:_startRunning()
 		return
 	end
 	-- 初始化并运行协程
-	self.co = coroutine.create(_threadProc)
+	self._co = coroutine.create(_threadProc)
 	self:_awake(self)
 end
 
 function Script:_endRunning()
-	self.co = nil
+	self._co = nil
 end
 
 function Script:_setActive()
-	local script_manager = self.script_manager
+	local script_manager = self._script_manager
 	assert(nil ~= script_manager)
 	script_manager:registerActiveScript(self)
 end
 
 function Script:_setInactive()
-	local script_manager = self.script_manager
+	local script_manager = self._script_manager
 	assert(nil ~= script_manager)
 	script_manager:unregisterActiveScript(self)
 end
 
 function Script:_awake(self_or_on_sig_logic)
-	local no_error, ret = coroutine.resume(self.co, self_or_on_sig_logic)
+	local no_error, ret = coroutine.resume(self._co, self_or_on_sig_logic)
 	if no_error then
 		if nil ~= ret then
 			-- in sig thread
 			-- ret就是wait_sig_logic，向信号调度器注册
-			local sig_dispatcher = self.sig_dispatcher
+			local sig_dispatcher = self._sig_dispatcher
 			assert(nil ~= sig_dispatcher)
 			sig_dispatcher:register(self, ret)
 		else
@@ -126,7 +126,7 @@ end
 function Script:_threadProc()
 	self:_setActive()
 
-	self.proc()
+	self._proc()
 
 	self:_setInactive()
 	self:_endRunning()
