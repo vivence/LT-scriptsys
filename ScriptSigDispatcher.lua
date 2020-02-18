@@ -36,6 +36,7 @@ function ScriptSigDispatcher:sendSig(sig)
 end
 
 local temp_script_sig_logic = {} -- 临时table
+-- tick的逻辑已经保证了触发onSig（执行离开本对象）时，已经完成了对_script_sig_logic和_sigs_cache的使用
 function ScriptSigDispatcher:tick(time, delta_time)
 	local sigs_set = self._sigs_cache
 	if not sigs_set:isEmpty() then
@@ -59,13 +60,13 @@ function ScriptSigDispatcher:tick(time, delta_time)
 			end
 		end
 
+		-- 清空信号缓存
+		self._sigs_cache:clear()
+
 		-- 触发信号
 		for script, sig_logic in pairs(temp_script_sig_logic) do
 			temp_script_sig_logic[script] = nil
 			script:onSig(sig_logic)
 		end
 	end
-
-	-- 清空信号缓存
-	self._sigs_cache:clear()
 end
