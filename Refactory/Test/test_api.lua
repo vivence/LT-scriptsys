@@ -18,8 +18,7 @@ local function setfenv(fn, env)
 end
 
 require("TypeSystemHeader")
-require("IScriptAPIDispatcher")
-require("ScriptAPIManager")
+require("ScriptSystemHeader")
 require("APIDispatcherSample")
 
 local apiTest1 = typesys.apiTest1{__super = IAPISample}

@@ -11,12 +11,18 @@ ScriptSystem = typesys.ScriptSystem {
 	_api_dispatcher = IScriptAPIDispatcher,
 	_api_manager = ScriptAPIManager,
 	_script_manager = ScriptManager,
+	_sig_dispatcher = ScriptSigDispatcher,
 }
 
 function ScriptSystem:ctor(api_dispatcher)
 	self._api_dispatcher = api_dispatcher
-	self._api_manager = new(ScriptAPIManager, self._api_dispatcher)
 	self._script_manager = new(ScriptManager)
+	self._sig_dispatcher = new(ScriptSigDispatcher)
+
+	self._api_manager = new(ScriptAPIManager, self._api_dispatcher, self._script_manager)
+
+	self._script_manager:_setSigDispatcher(self._sig_dispatcher)
+	self._sig_dispatcher:_setScriptManager(self._script_manager)
 end
 
 function ScriptSystem:dtor()
@@ -25,6 +31,7 @@ end
 
 function ScriptSystem:tick(time, delta_time)
 	self._api_dispatcher:tick(time, delta_time)
+	self._sig_dispatcher:tick(time, delta_time)
 end
 
 -- 通过此接口注册的API，将通过API调度器进行调度管理

@@ -27,19 +27,19 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 管理注册的api接口，负责对其调用进行包装
 
 脚本使用的方式有：
-1. 调用API，返回API访问器：						xxx(...) 						-- return api_token
+1. 调用API，返回API访问器：						xxx(...) 							-- return api_token
 2. API访问器的使用：	 
-	1. 查询是否在未执行状态：					apiIsPending(api_token)			-- return true or false
-	2. 查询是否在执行状态：						apiIsExecuting(api_token)		-- return true or false
-	3. 查询是否在结束状态：						apiIsDead(api_token)			-- return true or false
-	4. 查询是否被打断：						apiIsInterrupted(api_token)		-- return true or false
-	5. 获取调用结果：							apiGetReturn(api_token)  		-- return result or nil
-	6. 查询调用经过了多少时间：					apiGetTimeSpent(api_token)  	-- return time spent
-	7. 等待完成（time_out不为正数则无限等待）：	apiWait(api_token, time_out) 	-- return nil
-	8. 强制打断：								apiAbort(api_token) 			-- return nil
-3. 延迟时间：									delay(time)						-- return nil
-4. 等待条件：									waitCondition(condition)		-- return nil
-5. 等待信号：									waitSignal(sig_logic)			-- return nil
+	1. 查询是否在未执行状态：					apiIsPending(api_token)				-- return true or false
+	2. 查询是否在执行状态：						apiIsExecuting(api_token)			-- return true or false
+	3. 查询是否在结束状态：						apiIsDead(api_token)				-- return true or false
+	4. 查询是否被打断：						apiIsInterrupted(api_token)			-- return true or false
+	5. 获取调用结果：							apiGetReturn(api_token)  			-- return result or nil
+	6. 查询调用经过了多少时间：					apiGetTimeSpent(api_token)  		-- return time spent
+	7. 等待完成（time_out不为正数则无限等待）：	apiWait(api_token, time_out) 		-- return is_time_out
+	8. 强制打断：								apiAbort(api_token) 				-- return nil
+3. 延迟时间：									delay(time)							-- return nil
+4. 等待条件：									waitCondition(condition, time_out)	-- return is_time_out
+5. 等待事件逻辑：								waitEvent(event_logic, time_out)	-- return is_time_out
 
 组合使用方式举例：
 apiWait(xxx(...), time_out)
@@ -50,15 +50,17 @@ ScriptAPIManager = typesys.ScriptAPIManager{
 	_api_proxy_map = typesys.unmanaged,
 	_script_api_space = typesys.unmanaged,
 	weak__api_dispatcher = IScriptAPIDispatcher,
+	weak__script_manager = IScriptManager,
 }
 
-function ScriptAPIManager:ctor(api_dispatcher)
+function ScriptAPIManager:ctor(api_dispatcher, script_manager)
 	self._api_proxy_map = {}
 	self._script_api_space = setmetatable({
 		-- 如果想要为script提供一些算法或系统函数支持，在此处添加
 	}, {__index = self._api_proxy_map, __newindex = function() error("read only") end})
 
 	self._api_dispatcher = api_dispatcher
+	self._script_manager = script_manager
 
 	self:_registerBuiltInAPI()
 end
@@ -134,18 +136,26 @@ function ScriptAPIManager:_built_in_apiGetTimeSpent(api_token)
 end
 function ScriptAPIManager:_built_in_apiWait(api_token, time_out)
 	-- todo
+	-- 检查api状态
+	-- 使脚本等待api信号 self._script_manager:_scriptWait(sig_logic)
+	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
 end
 function ScriptAPIManager:_built_in_apiAbort(api_token)
 	self._api_dispatcher:apiAbort(api_token)
 end
-function ScriptAPIManager:_built_in_delay()
+function ScriptAPIManager:_built_in_delay(time)
 	-- todo
+	-- 使脚本等待计时信号
 end
-function ScriptAPIManager:_built_in_waitCondition()
+function ScriptAPIManager:_built_in_waitCondition(condition, time_out)
 	-- todo
+	-- 使脚本等待条件信号
+	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
 end
-function ScriptAPIManager:_built_in_waitSignal()
+function ScriptAPIManager:_built_in_waitEvent(event_logic, time_out)
 	-- todo
+	-- 使脚本等待事件逻辑
+	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
 end
 
 -- 注册内建API
@@ -158,5 +168,5 @@ for k, v in pairs(ScriptAPIManager) do
 		end
 	end
 end
-------- [代码区段结束] 内建API --------->
+------- [代码区段结束] 内建API ---------<
 
