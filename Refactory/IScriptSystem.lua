@@ -56,28 +56,28 @@ end
 
 
 
-------- [代码区段开始] 信号逻辑接口类 --------->
-IScriptSigLogic = typesys.IScriptSigLogic {
+------- [代码区段开始] 信号逻辑基类 --------->
+ScriptSigLogic = typesys.ScriptSigLogic {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	is_time_out = false,
 }
 
-function IScriptSigLogic:ctor()
+function ScriptSigLogic:ctor(sig_factory)
 end
 
-function IScriptSigLogic:dtor()
+function ScriptSigLogic:dtor()
 end
 
 -- sigs_set是一个typesys.map，key是string，value是boolean
-function IScriptSigLogic:check(sigs_set)
+function ScriptSigLogic:check(sigs_set)
 	assert(false)
 end
 
-function IScriptSigLogic:checkTimeOut(time, delta_time)
+function ScriptSigLogic:checkTimeOut(time, delta_time)
 	assert(false)
 end
-------- [代码区段结束] 信号逻辑接口类 ---------<
+------- [代码区段结束] 信号逻辑基类 ---------<
 
 
 

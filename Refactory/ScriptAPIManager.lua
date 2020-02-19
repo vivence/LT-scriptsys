@@ -52,17 +52,17 @@ ScriptAPIManager = typesys.ScriptAPIManager{
 	_script_api_space = typesys.unmanaged,
 	weak__api_dispatcher = IScriptAPIDispatcher,
 	weak__script_manager = IScriptManager,
+	weak__sig_factory = ScriptSigFactory,
 }
 
-function ScriptAPIManager:ctor(api_dispatcher, script_manager)
+function ScriptAPIManager:ctor(api_dispatcher, script_manager, sig_factory)
 	self._api_proxy_map = {}
-	self._script_api_space = setmetatable({
-		-- 如果想要为script提供一些算法或系统函数支持，在此处添加
-	}, {__index = self._api_proxy_map, __newindex = function() error("read only") end})
+	self._script_api_space = setmetatable({}, 
+		{__index = self._api_proxy_map, __newindex = function() error("read only") end})
 
 	self._api_dispatcher = api_dispatcher
-	assert(nil ~= script_manager)
 	self._script_manager = script_manager
+	self._sig_factory = sig_factory
 
 	self:_registerBuiltInAPI()
 end
@@ -178,7 +178,7 @@ end
 ------- [代码区段结束] 内建API ---------<
 
 function ScriptAPIManager:_waitSig(sig_logic_class, ...)
-	local sig_logic = new(sig_logic_class, ...)
+	local sig_logic = new(sig_logic_class, self._sig_factory, ...)
 	self._script_manager:_scriptWait(sig_logic)
 
 	-- 返回的sig_logic和等待的是同一个

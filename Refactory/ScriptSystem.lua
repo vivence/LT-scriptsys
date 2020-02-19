@@ -9,18 +9,18 @@ ScriptSystem = typesys.ScriptSystem {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	_api_dispatcher = IScriptAPIDispatcher,
-	_api_manager = ScriptAPIManager,
 	_script_manager = ScriptManager,
-	_sig_dispatcher = ScriptSigDispatcher,
 	_sig_factory = ScriptSigFactory,
+	_api_manager = ScriptAPIManager,
+	_sig_dispatcher = ScriptSigDispatcher,
 }
 
 function ScriptSystem:ctor(api_dispatcher_class)
 	self._api_dispatcher = new(api_dispatcher_class, self)
 	self._script_manager = new(ScriptManager)
-	self._sig_dispatcher = new(ScriptSigDispatcher)
-	self._api_manager = new(ScriptAPIManager, self._api_dispatcher, self._script_manager)
 	self._sig_factory = new(ScriptSigFactory)
+	self._sig_dispatcher = new(ScriptSigDispatcher)
+	self._api_manager = new(ScriptAPIManager, self._api_dispatcher, self._script_manager, self._sig_factory)
 
 	self._script_manager:_setSigDispatcher(self._sig_dispatcher)
 	self._sig_dispatcher:_setScriptManager(self._script_manager)
@@ -53,6 +53,11 @@ end
 -- 运行指定的token所表示的脚本
 function ScriptSystem:runScript(script_token)
 	return self._script_manager:runScript(script_token)
+end
+
+-- 强制中断指定的token所表示的脚本
+function ScriptSystem:abortScript(script_token)
+	return self._script_manager:abortScript(script_token)
 end
 
 function ScriptSystem:scriptIsRunning(script_token)

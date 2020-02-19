@@ -19,7 +19,7 @@ ScriptSigDispatcher = typesys.ScriptSigDispatcher {
 }
 
 function ScriptSigDispatcher:ctor()
-	self._script_listen_map = typesys.new(typesys.map, type(0), IScriptSigLogic, true) -- weak ref
+	self._script_listen_map = typesys.new(typesys.map, type(0), ScriptSigLogic, true) -- weak ref
 	self._sigs_cache = typesys.new(typesys.map, type(""), type(true))
 end
 

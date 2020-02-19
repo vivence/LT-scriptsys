@@ -73,15 +73,17 @@ local script_token = script_sys:loadScript("ScriptSample")
 -- 执行
 script_sys:runScript(script_token)
 
-local frame_count = 1
-script_sys:tick(frame_count, 1)
-
-while script_sys:scriptIsRunning(script_token) do
-	frame_count = frame_count + 1
-	script_sys:tick(frame_count, 1)
-	print("frame: ", frame_count)
+-- 帧循环
+local time = 1
+local delta_time = 1
+repeat
+    print("time: ", time)
+    -- script_sys:abortScript(script_token)
+    script_sys:tick(time, delta_time)
+    -- script_sys:abortScript(script_token)
+    time = time + delta_time
     _sleep(1)
-end
+until not script_sys:scriptIsRunning(script_token)
 
 -- 释放
 delete(script_sys)

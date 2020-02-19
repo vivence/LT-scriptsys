@@ -4,8 +4,10 @@ local function proc()
 	print("step1")
 	apiWait(testNumber(100))
 	print("step2")
-	apiWait(testString("hello"))
+	delay(5)
 	print("step3")
+	apiWait(testString("hello"))
+	print("step4")
 
 	return "proc finished"
 end
