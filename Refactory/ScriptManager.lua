@@ -150,7 +150,9 @@ function ScriptManager:_abortScript(script)
 end
 
 function ScriptManager:_handleScriptTickResult(script, ...)
-	self:_unsetActiveScript(script)
+	if self._active_script == script then
+		self:_unsetActiveScript(script)
+	end
 
 	if script:isRunning() then
 		-- 监听信号
@@ -161,7 +163,9 @@ function ScriptManager:_handleScriptTickResult(script, ...)
 end
 
 function ScriptManager:_handleScriptAwakeArgs(script, ...)
-	self:_setActiveScript(script)
+	if self._active_script ~= script then
+		self:_setActiveScript(script)
+	end
 	return ...
 end
 

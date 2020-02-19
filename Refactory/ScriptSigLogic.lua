@@ -9,31 +9,33 @@
 SSL_API = typesys.SSL_API {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptSigLogic,
+	__super = ScriptSigLogic,
+	weak__api_dispatcher = IScriptAPIDispatcher,
+	_api_token = 0,
+	_time_out = -1,
 }
 
-function SSL_API:ctor(api_token, time_out)
-	assert(false)
+function SSL_API:ctor(api_dispatcher, api_token, time_out)
+	self._api_dispatcher = api_dispatcher
+	self._api_token = api_token
+	self._time_out = time_out or self._time_out
 end
 
 function SSL_API:dtor()
-	assert(false)
+	
 end
 
+-- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_API:check(sigs_set)
-	assert(false)
+	return self._api_dispatcher:apiIsDead(self._api_token)
 end
 
 function SSL_API:checkTimeOut(time, delta_time)
-	assert(false)
-end
-
-function SSL_API:markTimeOut()
-	assert(false)
-end
-
-function SSL_API:isTimeOut()
-	assert(false)
+	if 0 < self._time_out then
+		local api_time_spent = self._api_dispatcher:apiGetTimeSpent(self._api_token)
+		return self._time_out < api_time_spent
+	end
+	return false
 end
 ------- [代码区段结束] API信号逻辑 ---------<
 
@@ -44,7 +46,7 @@ end
 SSL_Timing = typesys.SSL_Timing {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptSigLogic,
+	__super = ScriptSigLogic,
 }
 
 function SSL_Timing:ctor(time)
@@ -55,19 +57,12 @@ function SSL_Timing:dtor()
 	assert(false)
 end
 
+-- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Timing:check(sigs_set)
 	assert(false)
 end
 
 function SSL_Timing:checkTimeOut(time, delta_time)
-	assert(false)
-end
-
-function SSL_Timing:markTimeOut()
-	assert(false)
-end
-
-function SSL_Timing:isTimeOut()
 	assert(false)
 end
 ------- [代码区段结束] 计时信号逻辑 ---------<
@@ -79,7 +74,7 @@ end
 SSL_Condition = typesys.SSL_Condition {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptSigLogic,
+	__super = ScriptSigLogic,
 }
 
 function SSL_Condition:ctor(condition, time_out)
@@ -90,19 +85,12 @@ function SSL_Condition:dtor()
 	assert(false)
 end
 
+-- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Condition:check(sigs_set)
 	assert(false)
 end
 
 function SSL_Condition:checkTimeOut(time, delta_time)
-	assert(false)
-end
-
-function SSL_Condition:markTimeOut()
-	assert(false)
-end
-
-function SSL_Condition:isTimeOut()
 	assert(false)
 end
 ------- [代码区段结束] 条件信号逻辑 ---------<
@@ -114,7 +102,7 @@ end
 SSL_Event = typesys.SSL_Event {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptSigLogic,
+	__super = ScriptSigLogic,
 }
 
 function SSL_Event:ctor(event_logic, time_out)
@@ -125,19 +113,12 @@ function SSL_Event:dtor()
 	assert(false)
 end
 
+-- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Event:check(sigs_set)
 	assert(false)
 end
 
 function SSL_Event:checkTimeOut(time, delta_time)
-	assert(false)
-end
-
-function SSL_Event:markTimeOut()
-	assert(false)
-end
-
-function SSL_Event:isTimeOut()
 	assert(false)
 end
 ------- [代码区段结束] 条件信号逻辑 ---------<

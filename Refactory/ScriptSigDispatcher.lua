@@ -14,13 +14,13 @@ ScriptSigDispatcher = typesys.ScriptSigDispatcher {
 	__strong_pool = true,
 	__super = IScriptSigDispatcher,
 	weak__script_manager = IScriptManager,
-	_script_listen_map = typesys.map,
-	_sigs_cache = typesys.map,
+	_script_listen_map = typesys.map, -- bug:强引用管理，但是创建却不是在本类
+	_sigs_cache = typesys.map, 
 }
 
 function ScriptSigDispatcher:ctor()
-	self._script_listen_map = typesys.new(typesys.map, type(0), IScriptSigLogic)
-	self._sigs_cache = typesys.new(typesys.map, type(0), type(true))
+	self._script_listen_map = typesys.new(typesys.map, type(0), IScriptSigLogic, true) -- weak ref
+	self._sigs_cache = typesys.new(typesys.map, type(""), type(true))
 end
 
 function ScriptSigDispatcher:dtor()
@@ -31,9 +31,6 @@ local temp_script_listen_map = {} -- 临时table
 -- tick的逻辑已经保证了触发_scriptOnSig（执行离开本对象）时，已经完成了对_script_sig_logic和_sigs_cache的使用
 function ScriptSigDispatcher:tick(time, delta_time)
 	local sigs_set = self._sigs_cache
-	if sigs_set:isEmpty() then
-		return	
-	end
 
 	assert(nil == next(temp_script_listen_map)) -- 确保临时table为空
 
@@ -46,7 +43,7 @@ function ScriptSigDispatcher:tick(time, delta_time)
 		if nil ~= script then
 			local triggered = false
 			if sig_logic:checkTimeOut(time, delta_time) then
-				sig_logic:markTimeOut()
+				sig_logic.is_time_out = true
 				triggered = true
 			elseif sig_logic:check(sigs_set) then
 				triggered = true
@@ -55,7 +52,7 @@ function ScriptSigDispatcher:tick(time, delta_time)
 				-- 信号逻辑触发成功，先将脚本移除
 				script_listen_map:set(script_token, nil)
 				-- 将需要触发信号的脚本记录到临时table中
-				temp_script_sig_logic[script] = sig_logic
+				temp_script_listen_map[script] = sig_logic
 			end
 		else
 			-- 脚本已经不存在了
@@ -67,9 +64,9 @@ function ScriptSigDispatcher:tick(time, delta_time)
 	self._sigs_cache:clear()
 
 	-- 遍历触发信号
-	for script, sig_logic in pairs(temp_script_sig_logic) do
+	for script, sig_logic in pairs(temp_script_listen_map) do
 		-- 将触发信号的脚本从临时table中移除
-		temp_script_sig_logic[script] = nil 
+		temp_script_listen_map[script] = nil 
 		-- 触发信号
 		script_manager:_scriptOnSig(script, sig_logic)
 	end

@@ -35,7 +35,7 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 	3. 查询是否在结束状态：						apiIsDead(api_token)				-- return true or false
 	4. 查询是否因打断而结束：					apiDiedOfInterruption(api_token)	-- return true or false
 	5. 获取调用结果：							apiGetReturn(api_token)  			-- return result or nil
-	6. 查询调用经过了多少时间：					apiGetTimeSpent(api_token)  		-- return time spent
+	6. 查询调用经过了多少时间：					apiGetTimeSpent(api_token)  		-- return time_spent or -1
 	7. 等待完成（time_out不为正数则无限等待）：	apiWait(api_token, time_out) 		-- return not_time_out
 	8. 强制打断：								apiAbort(api_token) 				-- return nil
 3. 延迟时间：									delay(time)							-- return nil
@@ -61,6 +61,7 @@ function ScriptAPIManager:ctor(api_dispatcher, script_manager)
 	}, {__index = self._api_proxy_map, __newindex = function() error("read only") end})
 
 	self._api_dispatcher = api_dispatcher
+	assert(nil ~= script_manager)
 	self._script_manager = script_manager
 
 	self:_registerBuiltInAPI()
@@ -142,7 +143,7 @@ function ScriptAPIManager:_built_in_apiWait(api_token, time_out)
 	end
 
 	-- 使脚本等待api信号
-	return self:_waitSig(SSL_API, time)
+	return self:_waitSig(SSL_API, self._api_dispatcher, api_token, time_out)
 end
 function ScriptAPIManager:_built_in_apiAbort(api_token)
 	self._api_dispatcher:apiAbort(api_token)
@@ -181,7 +182,7 @@ function ScriptAPIManager:_waitSig(sig_logic_class, ...)
 	self._script_manager:_scriptWait(sig_logic)
 
 	-- 返回的sig_logic和等待的是同一个
-	local is_time_out = sig_logic:isTimeOut()
+	local is_time_out = sig_logic.is_time_out
 	delete(sig_logic)
 	sig_logic = nil
 	return not is_time_out

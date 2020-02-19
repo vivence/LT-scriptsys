@@ -61,6 +61,7 @@ end
 -- 唤醒为激活状态，返回被调用sleep传入的参数
 function ScriptThread:awake( ... )
 	assert(not self:isActive())
+	_log(self._id, "awake")
 
 	-- 返回sleep参数，或执行结束
 	return self:_handleResumeResult(_co_resume(self._co, ...))
@@ -69,6 +70,7 @@ end
 -- 使挂起为非激活状态，返回被调用awake传入的参数
 function ScriptThread:sleep( ... )
 	assert(self:isActive())
+	_log(self._id, "sleep")
 
 	-- 返回awake参数
 	return self:_handleYieldResule(_co_yield(...))

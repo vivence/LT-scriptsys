@@ -13,7 +13,7 @@ IScriptAPIDispatcher = typesys.IScriptAPIDispatcher {
 	__strong_pool = true,
 }
 
-function IScriptAPIDispatcher:ctor()
+function IScriptAPIDispatcher:ctor(script_sys)
 	assert(false)
 end
 
@@ -60,29 +60,21 @@ end
 IScriptSigLogic = typesys.IScriptSigLogic {
 	__pool_capacity = -1,
 	__strong_pool = true,
+	is_time_out = false,
 }
 
 function IScriptSigLogic:ctor()
-	assert(false)
 end
 
 function IScriptSigLogic:dtor()
-	assert(false)
 end
 
+-- sigs_set是一个typesys.map，key是string，value是boolean
 function IScriptSigLogic:check(sigs_set)
 	assert(false)
 end
 
 function IScriptSigLogic:checkTimeOut(time, delta_time)
-	assert(false)
-end
-
-function IScriptSigLogic:markTimeOut()
-	assert(false)
-end
-
-function IScriptSigLogic:isTimeOut()
 	assert(false)
 end
 ------- [代码区段结束] 信号逻辑接口类 ---------<

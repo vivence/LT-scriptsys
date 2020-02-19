@@ -1,10 +1,13 @@
 
 local function proc()
 
-	print("ScriptSample")
-	test1()
-	test2()
+	print("step1")
+	apiWait(testNumber(100))
+	print("step2")
+	apiWait(testString("hello"))
+	print("step3")
 
+	return "proc finished"
 end
 
 return proc

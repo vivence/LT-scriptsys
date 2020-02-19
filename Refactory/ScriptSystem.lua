@@ -12,14 +12,15 @@ ScriptSystem = typesys.ScriptSystem {
 	_api_manager = ScriptAPIManager,
 	_script_manager = ScriptManager,
 	_sig_dispatcher = ScriptSigDispatcher,
+	_sig_factory = ScriptSigFactory,
 }
 
-function ScriptSystem:ctor(api_dispatcher)
-	self._api_dispatcher = api_dispatcher
+function ScriptSystem:ctor(api_dispatcher_class)
+	self._api_dispatcher = new(api_dispatcher_class, self)
 	self._script_manager = new(ScriptManager)
 	self._sig_dispatcher = new(ScriptSigDispatcher)
-
 	self._api_manager = new(ScriptAPIManager, self._api_dispatcher, self._script_manager)
+	self._sig_factory = new(ScriptSigFactory)
 
 	self._script_manager:_setSigDispatcher(self._sig_dispatcher)
 	self._sig_dispatcher:_setScriptManager(self._script_manager)
@@ -58,6 +59,10 @@ function ScriptSystem:scriptIsRunning(script_token)
 	return self._script_manager:scriptIsRunning(script_token)
 end
 
+function ScriptSystem:sendSig_API(api_token)
+	local sig = self._sig_factory:createSig_API(api_token)
+	self._sig_dispatcher:sendSig(sig)
+end
 
 
 
