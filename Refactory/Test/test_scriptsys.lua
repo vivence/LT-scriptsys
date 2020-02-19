@@ -20,6 +20,9 @@ require("APIDispatcherSample")
 local new = typesys.new
 local delete = typesys.delete
 
+local time = 1
+local delta_time = 1
+
 -----------
 
 local apiTestNumber = typesys.apiTestNumber{
@@ -61,6 +64,9 @@ local AssistAPI = {}
 function AssistAPI.print( ... )
     print("[script-log]: ", ...)
 end
+function AssistAPI.getCurrentTime()
+    return time
+end
 
 -- 初始化
 local script_sys = new(ScriptSystem, APIDispatcherSample)
@@ -74,8 +80,6 @@ local script_token = script_sys:loadScript("ScriptSample")
 script_sys:runScript(script_token)
 
 -- 帧循环
-local time = 1
-local delta_time = 1
 repeat
     print("time: ", time)
     -- script_sys:abortScript(script_token)

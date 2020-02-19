@@ -53,6 +53,7 @@ ScriptAPIManager = typesys.ScriptAPIManager{
 	weak__api_dispatcher = IScriptAPIDispatcher,
 	weak__script_manager = IScriptManager,
 	weak__sig_factory = ScriptSigFactory,
+	_forbid_post_api = false,
 }
 
 function ScriptAPIManager:ctor(api_dispatcher, script_manager, sig_factory)
@@ -113,6 +114,7 @@ end
 
 -- return api_token
 function ScriptAPIManager:_callAPI(api_name, api_info, ... )
+	assert(not self._forbid_post_api)
 	return self._api_dispatcher:postAPI(api_name, api_info, ...)
 end
 
@@ -153,10 +155,15 @@ function ScriptAPIManager:_built_in_delay(time)
 	return self:_waitSig(SSL_Timing, time)
 end
 function ScriptAPIManager:_built_in_waitCondition(condition, time_out)
-	-- 检查条件，todo同时还要验证条件里没有调用过API
-	if condition() then
+	-- 检查条件，同时还要验证条件里没有调用过“投递式API”（postAPI）
+	self._forbid_post_api = true
+	local condition_ret = condition()
+	self._forbid_post_api = false
+
+	if condition_ret then
 		return true -- not_time_out
 	end
+
 	-- 使脚本等待条件信号
 	return self:_waitSig(SSL_Condition, condition, time_out)
 end

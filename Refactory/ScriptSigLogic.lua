@@ -51,7 +51,7 @@ SSL_Timing = typesys.SSL_Timing {
 	__strong_pool = true,
 	__super = ScriptSigLogic,
 	_time = 0,
-	_passed_time = 0,
+	_time_spent = 0,
 }
 
 function SSL_Timing:ctor(sig_factory, time)
@@ -64,11 +64,11 @@ end
 
 -- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Timing:check(sigs_set)
-	return self._passed_time >= self._time
+	return self._time_spent >= self._time
 end
 
 function SSL_Timing:checkTimeOut(time, delta_time)
-	self._passed_time = self._passed_time + delta_time
+	self._time_spent = self._time_spent + delta_time
 end
 ------- [代码区段结束] 计时信号逻辑 ---------<
 
@@ -80,23 +80,31 @@ SSL_Condition = typesys.SSL_Condition {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	__super = ScriptSigLogic,
+	_condition = typesys.unmanaged,
+	_time_out = -1,
+	_time_spent = 0,
 }
 
 function SSL_Condition:ctor(sig_factory, condition, time_out)
-	assert(false)
+	self._condition = condition
+	self._time_out = time_out
 end
 
 function SSL_Condition:dtor()
-	assert(false)
+	
 end
 
 -- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Condition:check(sigs_set)
-	assert(false)
+	return self._condition()
 end
 
 function SSL_Condition:checkTimeOut(time, delta_time)
-	assert(false)
+	self._time_spent = self._time_spent + delta_time
+	if 0 < self._time_out then
+		return self._time_out < self._time_spent
+	end
+	return false
 end
 ------- [代码区段结束] 条件信号逻辑 ---------<
 
