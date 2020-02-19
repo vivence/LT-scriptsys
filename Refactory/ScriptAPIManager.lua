@@ -3,6 +3,7 @@ local function _log(...) print("[ScriptAPIManager]", ...) end
 local assert = assert
 
 local new = typesys.new
+local delete = typesys.delete
 
 ------- [代码区段开始] API代理 --------->
 
@@ -32,14 +33,14 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 	1. 查询是否在未执行状态：					apiIsPending(api_token)				-- return true or false
 	2. 查询是否在执行状态：						apiIsExecuting(api_token)			-- return true or false
 	3. 查询是否在结束状态：						apiIsDead(api_token)				-- return true or false
-	4. 查询是否被打断：						apiIsInterrupted(api_token)			-- return true or false
+	4. 查询是否因打断而结束：					apiDiedOfInterruption(api_token)	-- return true or false
 	5. 获取调用结果：							apiGetReturn(api_token)  			-- return result or nil
 	6. 查询调用经过了多少时间：					apiGetTimeSpent(api_token)  		-- return time spent
-	7. 等待完成（time_out不为正数则无限等待）：	apiWait(api_token, time_out) 		-- return is_time_out
+	7. 等待完成（time_out不为正数则无限等待）：	apiWait(api_token, time_out) 		-- return not_time_out
 	8. 强制打断：								apiAbort(api_token) 				-- return nil
 3. 延迟时间：									delay(time)							-- return nil
-4. 等待条件：									waitCondition(condition, time_out)	-- return is_time_out
-5. 等待事件逻辑：								waitEvent(event_logic, time_out)	-- return is_time_out
+4. 等待条件：									waitCondition(condition, time_out)	-- return not_time_out
+5. 等待事件逻辑：								waitEvent(event_logic, time_out)	-- return not_time_out
 
 组合使用方式举例：
 apiWait(xxx(...), time_out)
@@ -125,8 +126,8 @@ end
 function ScriptAPIManager:_built_in_apiIsDead(api_token)
 	return self._api_dispatcher:apiIsDead(api_token)
 end
-function ScriptAPIManager:_built_in_apiIsInterrupted(api_token)
-	return self._api_dispatcher:apiIsInterrupted(api_token)
+function ScriptAPIManager:_built_in_apiDiedOfInterruption(api_token)
+	return self._api_dispatcher:apiDiedOfInterruption(api_token)
 end
 function ScriptAPIManager:_built_in_apiGetReturn(api_token)
 	return self._api_dispatcher:apiGetReturn(api_token)
@@ -135,27 +136,32 @@ function ScriptAPIManager:_built_in_apiGetTimeSpent(api_token)
 	return self._api_dispatcher:apiGetTimeSpent(api_token)
 end
 function ScriptAPIManager:_built_in_apiWait(api_token, time_out)
-	-- todo
 	-- 检查api状态
-	-- 使脚本等待api信号 self._script_manager:_scriptWait(sig_logic)
-	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
+	if self._api_dispatcher:apiIsDead(api_token) then
+		return true -- not_time_out
+	end
+
+	-- 使脚本等待api信号
+	return self:_waitSig(SSL_API, time)
 end
 function ScriptAPIManager:_built_in_apiAbort(api_token)
 	self._api_dispatcher:apiAbort(api_token)
 end
 function ScriptAPIManager:_built_in_delay(time)
-	-- todo
 	-- 使脚本等待计时信号
+	return self:_waitSig(SSL_Timing, time)
 end
 function ScriptAPIManager:_built_in_waitCondition(condition, time_out)
-	-- todo
+	-- 检查条件，todo同时还要验证条件里没有调用过API
+	if condition() then
+		return true -- not_time_out
+	end
 	-- 使脚本等待条件信号
-	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
+	return self:_waitSig(SSL_Condition, condition, time_out)
 end
 function ScriptAPIManager:_built_in_waitEvent(event_logic, time_out)
-	-- todo
-	-- 使脚本等待事件逻辑
-	-- 如何设计返回值会比较符合使用直觉呢？is_time_out
+	-- 使脚本等待事件信号
+	return self:_waitSig(SSL_Event, event_logic, time_out)
 end
 
 -- 注册内建API
@@ -169,4 +175,15 @@ for k, v in pairs(ScriptAPIManager) do
 	end
 end
 ------- [代码区段结束] 内建API ---------<
+
+function ScriptAPIManager:_waitSig(sig_logic_class, ...)
+	local sig_logic = new(sig_logic_class, ...)
+	self._script_manager:_scriptWait(sig_logic)
+
+	-- 返回的sig_logic和等待的是同一个
+	local is_time_out = sig_logic:isTimeOut()
+	delete(sig_logic)
+	sig_logic = nil
+	return not is_time_out
+end
 

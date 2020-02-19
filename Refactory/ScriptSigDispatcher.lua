@@ -44,7 +44,14 @@ function ScriptSigDispatcher:tick(time, delta_time)
 	for script_token, sig_logic in script_listen_map:pairs() do
 		local script = script_manager:_getScriptListeningSig(script_token)
 		if nil ~= script then
-			if sig_logic:check(sigs_set) then
+			local triggered = false
+			if sig_logic:checkTimeOut(time, delta_time) then
+				sig_logic:markTimeOut()
+				triggered = true
+			elseif sig_logic:check(sigs_set) then
+				triggered = true
+			end
+			if triggered then
 				-- 信号逻辑触发成功，先将脚本移除
 				script_listen_map:set(script_token, nil)
 				-- 将需要触发信号的脚本记录到临时table中

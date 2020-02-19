@@ -38,7 +38,7 @@ end
 function IScriptAPIDispatcher:apiIsDead(api_token)
 	assert(false)
 end
-function IScriptAPIDispatcher:apiIsInterrupted(api_token)
+function IScriptAPIDispatcher:apiDiedOfInterruption(api_token)
 	assert(false)
 end
 function IScriptAPIDispatcher:apiGetReturn(api_token)
@@ -71,6 +71,18 @@ function IScriptSigLogic:dtor()
 end
 
 function IScriptSigLogic:check(sigs_set)
+	assert(false)
+end
+
+function IScriptSigLogic:checkTimeOut(time, delta_time)
+	assert(false)
+end
+
+function IScriptSigLogic:markTimeOut()
+	assert(false)
+end
+
+function IScriptSigLogic:isTimeOut()
 	assert(false)
 end
 ------- [代码区段结束] 信号逻辑接口类 ---------<
