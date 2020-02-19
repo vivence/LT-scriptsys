@@ -126,16 +126,25 @@ end
 
 ------- [代码区段开始] 私有函数 --------->
 function ScriptManager:_runScript(script, ...)
+	assert(nil == self._active_script and nil ~= script) -- 为了不增加逻辑复杂深度，不支持嵌套
+
+	-- 进入脚本执行环境
 	self:_setActiveScript(script)
 	self:_handleScriptTickResult(script, script:run(...))
 end
 
 function ScriptManager:_awakeScript(script, ...)
+	assert(nil == self._active_script and nil ~= script) -- 为了不增加逻辑复杂深度，不支持嵌套
+
+	-- 进入脚本执行环境
 	self:_setActiveScript(script)
 	self:_handleScriptTickResult(script, script:awake(...))
 end
 
 function ScriptManager:_sleepScript(script, ...)
+	assert(self._active_script == script) -- 为了不增加逻辑复杂深度，不支持嵌套
+
+	-- 退出脚本执行环境
 	self:_unsetActiveScript(script)
 	return self:_handleScriptAwakeArgs(script, script:sleep(...))
 end
@@ -150,9 +159,8 @@ function ScriptManager:_abortScript(script)
 end
 
 function ScriptManager:_handleScriptTickResult(script, ...)
-	if self._active_script == script then
-		self:_unsetActiveScript(script)
-	end
+	-- 退出脚本执行环境
+	self:_unsetActiveScript(script)
 
 	if script:isRunning() then
 		-- 监听信号
@@ -163,20 +171,16 @@ function ScriptManager:_handleScriptTickResult(script, ...)
 end
 
 function ScriptManager:_handleScriptAwakeArgs(script, ...)
-	if self._active_script ~= script then
-		self:_setActiveScript(script)
-	end
+	-- 进入脚本执行环境
+	self:_setActiveScript(script)
 	return ...
 end
 
--- 为了不增加逻辑复杂深度，_setActiveScript与_unsetActiveScript只能是成对逻辑，不支持嵌套
 function ScriptManager:_setActiveScript(script)
-	assert(nil == self._active_script and nil ~= script)
 	self._active_script = script
 end
 
 function ScriptManager:_unsetActiveScript(script)
-	assert(self._active_script == script)
 	self._active_script = nil
 end
 ------- [代码区段结束] 私有函数 ---------<

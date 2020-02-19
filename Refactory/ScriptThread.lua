@@ -61,7 +61,7 @@ end
 -- 唤醒为激活状态，返回被调用sleep传入的参数
 function ScriptThread:awake( ... )
 	assert(not self:isActive())
-	_log(self._id, "awake")
+	_log(self._id, "<awake>")
 
 	-- 返回sleep参数，或执行结束
 	return self:_handleResumeResult(_co_resume(self._co, ...))
@@ -70,7 +70,7 @@ end
 -- 使挂起为非激活状态，返回被调用awake传入的参数
 function ScriptThread:sleep( ... )
 	assert(self:isActive())
-	_log(self._id, "sleep")
+	_log(self._id, "<sleep>")
 
 	-- 返回awake参数
 	return self:_handleYieldResule(_co_yield(...))
@@ -83,24 +83,26 @@ end
 function ScriptThread:_startRunning(proc, ...)
 	assert(not self:isRunning())
 
-	_log(self._id, "start")
+	_log(self._id, "<start>")
 	self._co = _co_create(proc)
 	return self:_handleResumeResult(_co_resume(self._co, ...))
 end
 
-function ScriptThread:_endRunning()
+function ScriptThread:_endRunning(no_error, ...)
 	assert(self:isRunning())
 
 	self._co = nil
-	_log(self._id, "end")
+	if no_error then
+		_log(self._id, "<end>", ...)
+	else
+		_log(self._id, "<error>", ...)
+	end
 end
 
 function ScriptThread:_handleResumeResult(no_error, ...)
 	local status = _co_status(self._co)
-	if _STATUS_DEAD ~= status then
-		_log(self._id, "sleeped")
-	else
-		self:_endRunning()
+	if _STATUS_DEAD == status then
+		self:_endRunning(no_error, ...)
 	end
 	return ...
 end
