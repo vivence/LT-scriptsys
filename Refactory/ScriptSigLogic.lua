@@ -41,7 +41,7 @@ end
 
 
 ------- [代码区段开始] 计时信号逻辑 --------->
-SSL_Timing = typesys.SSL_API {
+SSL_Timing = typesys.SSL_Timing {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	__super = IScriptSigLogic,
@@ -76,7 +76,7 @@ end
 
 
 ------- [代码区段开始] 条件信号逻辑 --------->
-SSL_Condition = typesys.SSL_API {
+SSL_Condition = typesys.SSL_Condition {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	__super = IScriptSigLogic,
@@ -111,7 +111,7 @@ end
 
 
 ------- [代码区段开始] 事件信号逻辑 --------->
-SSL_Event = typesys.SSL_API {
+SSL_Event = typesys.SSL_Event {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	__super = IScriptSigLogic,
