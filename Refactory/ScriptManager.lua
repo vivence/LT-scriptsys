@@ -170,7 +170,7 @@ function ScriptManager:_handleScriptTickResult(script, ...)
 		-- 监听信号
 		self._sig_dispatcher:_listenSig(_getScriptToken(script), ...)
 	else
-		-- todo: 如果有必要，则记录脚本运行结果...
+		-- todo: 如果有必要，则记录脚本运行结果table.pack(...)
 	end
 end
 
