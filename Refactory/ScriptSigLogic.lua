@@ -79,6 +79,8 @@ end
 --[[
 条件信号逻辑是可以结合api查询接口来实现带有逻辑的或者多api的条件达成
 如果将事件逻辑的构建接口也提供给脚本使用者，还能将事件逻辑判断也一并融合进来，实现复杂的条件逻辑
+但是其难点是：是否要将sigs_set传入condition，如果是这样，那么APi预判中也要构造个空的sigs_set，避免nil访问错误
+同时也有被篡改的风险
 --]]
 SSL_Condition = typesys.SSL_Condition {
 	__pool_capacity = -1,
@@ -125,22 +127,30 @@ SSL_Event = typesys.SSL_Event {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	__super = ScriptSigLogic,
+	_event_logic_func = typesys.unmanaged,
+	_time_out = -1,
+	_time_spent = 0,
 }
 
-function SSL_Event:ctor(sig_factory, event_logic, time_out)
-	assert(false)
+function SSL_Event:ctor(sig_factory, event_logic_func, time_out)
+	self._event_logic_func = event_logic_func
+	self._time_out = time_out
 end
 
 function SSL_Event:dtor()
-	assert(false)
+	
 end
 
 -- sigs_set是一个typesys.map，key是string，value是boolean
 function SSL_Event:check(sigs_set)
-	assert(false)
+	return self._event_logic_func(sigs_set)
 end
 
 function SSL_Event:checkTimeOut(time, delta_time)
-	assert(false)
+	self._time_spent = self._time_spent + delta_time
+	if 0 < self._time_out then
+		return self._time_out < self._time_spent
+	end
+	return false
 end
 ------- [代码区段结束] 条件信号逻辑 ---------<

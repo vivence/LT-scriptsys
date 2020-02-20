@@ -40,8 +40,7 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 	8. 强制打断：								apiAbort(api_token) 				-- return nil
 3. 延迟时间：									delay(time)							-- return nil
 4. 等待条件：									waitCondition(condition, time_out)	-- return not_time_out
-5. 等待事件逻辑：								waitEvent(event_logic, time_out)	-- return not_time_out
-6. 构建事件逻辑（expression为字符串）：			eventLogic(expression)				-- return event_logic
+5. 等待事件逻辑：								waitEvent(expression, time_out)	-- return not_time_out
 
 组合使用方式举例：
 apiWait(xxx(...), time_out)
@@ -168,15 +167,24 @@ function ScriptAPIManager:_built_in_waitCondition(condition, time_out)
 	-- 使脚本等待条件信号
 	return self:_waitSig(SSL_Condition, condition, time_out)
 end
-function ScriptAPIManager:_built_in_waitEvent(event_logic, time_out)
+
+local function _transExp(sig_factory, expression)
+	return string.gsub(expression, "%$([%w_]+)", function (event_name)
+		return string.format("sigs_set:containKey('%s')", sig_factory:createSig_Event(event_name))
+	end)
+end
+--[[
+构建事件逻辑（expression为字符串）return event_logic_func
+事件名在expression中必须以‘$’字符作为起始，后面只能跟字母、数字和下划线，匹配模式为"%$([%w_]+)"
+--]]
+function _createEventLogic(sig_factory, expression)
+	return load(string.format("local sigs_set=...; return (%s)", _transExp(sig_factory, expression)))
+end
+function ScriptAPIManager:_built_in_waitEvent(expression, time_out)
 	-- 使脚本等待事件信号
-	return self:_waitSig(SSL_Event, event_logic, time_out)
-end
-local function _transExp(expression)
-	-- todo
-end
-function ScriptAPIManager:_built_in_eventLogic(expression)
-	return load(string.format("local sigs_set=...; return (%s)", _transExp(expression)))
+	local event_logic_func = _createEventLogic(self._sig_factory, expression)
+	print("test", event_logic_func)
+	return self:_waitSig(SSL_Event, event_logic_func, time_out)
 end
 
 -- 注册内建API

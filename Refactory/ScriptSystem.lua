@@ -69,6 +69,11 @@ function ScriptSystem:sendSig_API(api_token)
 	self._sig_dispatcher:sendSig(sig)
 end
 
+function ScriptSystem:sendSig_Event(event_name)
+	local sig = self._sig_factory:createSig_Event(event_name)
+	self._sig_dispatcher:sendSig(sig)
+end
+
 
 
 

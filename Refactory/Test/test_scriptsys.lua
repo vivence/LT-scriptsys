@@ -40,6 +40,14 @@ repeat
     -- script_sys:abortScript(script_token)
     g_time = g_time + g_delta_time
     _sleep(1)
+
+    -- 随机触发事件
+    local r = math.random(1, 5)
+    if 1 == r then
+        script_sys:sendSig_Event("event_1")
+    elseif 2 == r then
+        script_sys:sendSig_Event("event_2")
+    end
 until not script_sys:scriptIsRunning(script_token)
 
 -- 释放
