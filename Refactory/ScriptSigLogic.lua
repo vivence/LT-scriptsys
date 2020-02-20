@@ -76,6 +76,10 @@ end
 
 
 ------- [代码区段开始] 条件信号逻辑 --------->
+--[[
+条件信号逻辑是可以结合api查询接口来实现带有逻辑的或者多api的条件达成
+如果将事件逻辑的构建接口也提供给脚本使用者，还能将事件逻辑判断也一并融合进来，实现复杂的条件逻辑
+--]]
 SSL_Condition = typesys.SSL_Condition {
 	__pool_capacity = -1,
 	__strong_pool = true,
@@ -112,6 +116,11 @@ end
 
 
 ------- [代码区段开始] 事件信号逻辑 --------->
+--[[
+关于事件逻辑，考虑直接用lua语法中的 and or not以及小括号()，配合事件名来构造
+解析时将事件名转换成sigs_set:containKey(sig)，其中sig是由sig_factory通过事件名创建出来的
+将转换后的代码块构建成一个check函数（参数为sigs_set），在check时进行调用并返回事件是否达成
+--]]
 SSL_Event = typesys.SSL_Event {
 	__pool_capacity = -1,
 	__strong_pool = true,

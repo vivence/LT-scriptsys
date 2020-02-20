@@ -41,6 +41,7 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 3. 延迟时间：									delay(time)							-- return nil
 4. 等待条件：									waitCondition(condition, time_out)	-- return not_time_out
 5. 等待事件逻辑：								waitEvent(event_logic, time_out)	-- return not_time_out
+6. 构建事件逻辑（expression为字符串）：			eventLogic(expression)				-- return event_logic
 
 组合使用方式举例：
 apiWait(xxx(...), time_out)
@@ -170,6 +171,12 @@ end
 function ScriptAPIManager:_built_in_waitEvent(event_logic, time_out)
 	-- 使脚本等待事件信号
 	return self:_waitSig(SSL_Event, event_logic, time_out)
+end
+local function _transExp(expression)
+	-- todo
+end
+function ScriptAPIManager:_built_in_eventLogic(expression)
+	return load(string.format("local sigs_set=...; return (%s)", _transExp(expression)))
 end
 
 -- 注册内建API

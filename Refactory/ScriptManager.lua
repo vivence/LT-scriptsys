@@ -44,9 +44,13 @@ end
 
 -- 加载制定名字（lua文件名）的脚本，并指定其API空间
 function ScriptManager:loadScript(script_name, api_space)
-	local script_proc = require(script_name)
-	_setfenv(script_proc, api_space)
-	local script = new(Script, script_name, script_proc)
+	local script_proc_list = require(script_name)
+	for i=1, #script_proc_list do
+		_setfenv(script_proc_list[i], api_space)
+	end
+	
+	local main_proc = script_proc_list[1]
+	local script = new(Script, script_name, main_proc)
 	local script_token = _getScriptToken(script)
 	self._script_map:set(script_token, script)
 	return script_token

@@ -1,22 +1,28 @@
 
-local function proc()
+-- 未解决问题：如果定义多个函数来组织脚本代码，怎么为每个函数都设置API空间
 
-	print("step1")
-	apiWait(testNumber(100))
-	print("step2")
+local function subProc()
 	delay(5)
-	print("step3")
+	print("sub-step1")
 	apiWait(testString("hello"))
-	print("step4")
+	print("sub-step2")
 	if not waitCondition(function()
 		return 10 <= getCurrentTime()
 	end, -1) then
 		-- timed out
 		print("condition timed out!")
 	end
-	print("step5")
+	print("sub-step3")
+end
+
+local function proc( ... )
+	print("step1")
+	apiWait(testNumber(100))
+	print("step2")
+	subProc()
+	print("step3")
 
 	return "proc finished"
 end
 
-return proc
+return {proc, subProc}
