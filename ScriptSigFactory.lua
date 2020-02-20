@@ -14,3 +14,11 @@ end
 function ScriptSigFactory:dtor()
 	
 end
+
+function ScriptSigFactory:createSig_API(api_token)
+	return string.format("[%d]sig_api: %d", self._id, api_token)
+end
+
+function ScriptSigFactory:createSig_Event(event_name)
+	return string.format("[%d]sig_event: %s", self._id, event_name)
+end

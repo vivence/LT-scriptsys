@@ -1,4 +1,4 @@
-package.path = package.path ..';../Refactory/?.lua;../../lua-typesys/?.lua'
+package.path = package.path ..';../?.lua;../../lua-typesys/?.lua'
 
 require("TypeSystemHeader")
 require("ScriptThread")

@@ -1,136 +1,51 @@
 
-local _log = nil
-if typesys.DEBUG_ON then 
-	_log = function(id, ...) print(string.format("Script[%d]", id), ...) end 
-else
-	_log = function() end
-end
+local new = typesys.new
 
---[[
-脚本类，使用脚本函数构建此类对象，并指定其信号调度器
---]]
 Script = typesys.Script {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	_co = typesys.unmanaged,   -- 协程
-	_proc = typesys.unmanaged, -- 脚本函数
-	weak__script_manager = ScriptManager,
-	weak__sig_dispatcher = ScriptSigDispatcher,
+	_name = "",
+	_proc = typesys.unmanaged,
+	_thread = ScriptThread,
 }
 
--- 协程proc
-local function _threadProc(self)
-	self:_threadProc()
-end
-
-function Script:ctor(proc, script_manager, sig_dispatcher)
-	assert(nil ~= proc and "function" == type(proc))
-	assert(nil ~= sig_dispatcher)
+function Script:ctor(name, proc)
+	self._name = name
 	self._proc = proc
-	self._script_manager = script_manager
-	self._sig_dispatcher = sig_dispatcher
+	self._thread = new(ScriptThread)
 end
 
 function Script:dtor()
 	self._proc = nil
-	self._sig_dispatcher = nil
 end
 
--- 脚本是否处于运行状态，注意运行状态中可能是激活状态，也可能是非激活状态（等待信号）
+-- 返回一帧执行后的结果，isRunning()为true，则是sleep参数，否则是proc的返回值
+function Script:run(...)
+	return self._thread:start(self._proc, ...)
+end
+
+-- 返回一帧执行后的结果，isRunning()为true，则是sleep参数，否则是proc的返回值
+function Script:awake( ... )
+	return self._thread:awake(...)
+end
+
+-- 返回awake参数
+function Script:sleep( ... )
+	return self._thread:sleep(...)
+end
+
+function Script:abort()
+	return self._thread:abort()
+end
+
 function Script:isRunning()
-	return nil ~= self._co
+	return nil ~= self._thread and self._thread:isRunning()
 end
 
--- 脚本是否处于激活状态
 function Script:isActive()
-	local script_manager = self._script_manager
-	assert(nil ~= script_manager)
-	return script_manager:isActiveScript(self)
+	return nil ~= self._thread and self._thread:isActive()
 end
 
--- 脚本启动的入口函数
-function Script:run()
-	self:_startRunning()
-end
 
--- 由信号调度器调用，用于触发信号
-function Script:onSig(on_sig_logic)
-	-- in sig thread
-	assert(self:isRunning() and not self:isActive()) -- 确保不在自身脚本运行的协程内
-	self:_awake(on_sig_logic)
-end
 
--- 由脚本调用的等待型API调用
-function Script:waitSig(wait_sig_logic)
-	-- in self thread
-	assert(nil ~= wait_sig_logic)
-	assert(self:isActive()) -- 确保在自身脚本运行的协程内
-	return self:_sleep(wait_sig_logic)
-end
-
-------- [代码区段开始] 私有函数 --------->
-
-function Script:_startRunning()
-	if self:isRunning() then
-		return
-	end
-	-- 初始化并运行协程
-	self._co = coroutine.create(_threadProc)
-	self:_awake(self)
-end
-
-function Script:_endRunning()
-	self._co = nil
-end
-
-function Script:_setActive()
-	local script_manager = self._script_manager
-	assert(nil ~= script_manager)
-	script_manager:registerActiveScript(self)
-end
-
-function Script:_setInactive()
-	local script_manager = self._script_manager
-	assert(nil ~= script_manager)
-	script_manager:unregisterActiveScript(self)
-end
-
-function Script:_awake(self_or_on_sig_logic)
-	local no_error, ret = coroutine.resume(self._co, self_or_on_sig_logic)
-	if no_error then
-		if nil ~= ret then
-			-- in sig thread
-			-- ret就是wait_sig_logic，向信号调度器注册
-			local sig_dispatcher = self._sig_dispatcher
-			assert(nil ~= sig_dispatcher)
-			sig_dispatcher:register(self, ret)
-		else
-			-- 脚本执行完毕
-			_log(self._id, "finished")
-		end
-	else
-		_log(self._id, ret)
-	end
-end
-
-function Script:_sleep(wait_sig_logic)
-	-- in self thread
-	local on_sig_logic = coroutine.yield(wait_sig_logic) -- 用yield将等待的信号逻辑转发到信号调度器协程空间
-	if on_sig_logic:isAbort() then
-		-- 收到中断信号，通过error强制返回
-		error("abort")
-	end
-	return sig
-end
-
-function Script:_threadProc()
-	self:_setActive()
-
-	self._proc()
-
-	self:_setInactive()
-	self:_endRunning()
-end
-
-------- [代码区段开始] 私有函数 ---------<
 
