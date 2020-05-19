@@ -17,7 +17,11 @@ local function _setfenv(fn, env)
 end
 
 local function _getScriptToken(script)
-	return script._id
+	return script.__id
+end
+
+local function _friendCall(self, func_name, ...)
+	return self[func_name](self, ...)
 end
 
 local new = typesys.new
@@ -25,20 +29,19 @@ local new = typesys.new
 --[[
 管理脚本对象
 --]]
-ScriptManager = typesys.ScriptManager {
+ScriptManager = typesys.def.ScriptManager {__super = IScriptManager,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptManager,
 	weak__sig_dispatcher = IScriptSigDispatcher,
 	_script_map = typesys.map, -- key:script_token, value:script
 	weak__active_script = Script,
 }
 
-function ScriptManager:ctor()
+function ScriptManager:__ctor()
 	self._script_map = new(typesys.map, type(0), Script)
 end
 
-function ScriptManager:dtor()
+function ScriptManager:__dtor()
 	
 end
 
@@ -168,7 +171,7 @@ function ScriptManager:_handleScriptTickResult(script, ...)
 
 	if script:isRunning() then
 		-- 监听信号
-		self._sig_dispatcher:_listenSig(_getScriptToken(script), ...)
+		_friendCall(self._sig_dispatcher, "_listenSig", _getScriptToken(script), ...)
 	else
 		-- todo: 如果有必要，则记录脚本运行结果table.pack(...)
 	end

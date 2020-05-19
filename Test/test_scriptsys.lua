@@ -11,7 +11,7 @@ local function _sleep(seconds)
     os.execute(str)
 end
 
-package.path = package.path ..';../?.lua;../../lua-typesys/?.lua'
+package.path = package.path ..';../?.lua;../../lua-typesys/Refactory/?.lua'
 
 require("TypeSystemHeader")
 require("ScriptSystemHeader")
@@ -19,10 +19,13 @@ require("APIDispatcherSample")
 require("APISample")
 
 local new = typesys.new
-local delete = typesys.delete
+local gc = typesys.gc
+local setRootObject = typesys.setRootObject
 
 -- 初始化
 local script_sys = new(ScriptSystem, APIDispatcherSample)
+setRootObject(script_sys)
+
 script_sys:registerAPI(APIMapSample)
 script_sys:registerAssistAPI(AssistAPIMapSample)
 
@@ -34,7 +37,7 @@ script_sys:runScript(script_token)
 
 -- 帧循环
 repeat
-    print("time: ", g_time)
+    print("[main] time: ", g_time)
     -- script_sys:abortScript(script_token)
     script_sys:tick(g_time, g_delta_time)
     -- script_sys:abortScript(script_token)
@@ -48,10 +51,12 @@ repeat
     elseif 2 == r then
         script_sys:sendSig_Event("event_2")
     end
+
+    gc()
 until not script_sys:scriptIsRunning(script_token)
 
 -- 释放
-delete(script_sys)
+setRootObject(nil)
 script_sys = nil
 
 

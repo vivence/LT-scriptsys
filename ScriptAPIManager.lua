@@ -1,16 +1,21 @@
 
-local function _log(...) print("[ScriptAPIManager]", ...) end
+local _LOG_ON = false
+
+local print = print
 local assert = assert
 
 local new = typesys.new
-local delete = typesys.delete
+
+local function _friendCall(self, func_name, ...)
+	return self[func_name](self, ...)
+end
 
 ------- [代码区段开始] API代理 --------->
 
 local _api_proxy_mt = {
 	__call = function(proxy, ...)
 		-- return api_token
-		return proxy.api_manager:_callAPI(proxy.api_name, proxy.api_info, ...)
+		return _friendCall(proxy.api_manager, "_callAPI", proxy.api_name, proxy.api_info, ...)
 	end
 }
 
@@ -45,18 +50,19 @@ local _built_in_apis = {} -- 在代码最后面会填充此表格
 组合使用方式举例：
 apiWait(xxx(...), time_out)
 --]]
-ScriptAPIManager = typesys.ScriptAPIManager{
+ScriptAPIManager = typesys.def.ScriptAPIManager{
 	__pool_capacity = -1,
 	__strong_pool = true,
-	_api_proxy_map = typesys.unmanaged,
-	_script_api_space = typesys.unmanaged,
+	_api_proxy_map = typesys.__unmanaged,
+	_script_api_space = typesys.__unmanaged,
 	weak__api_dispatcher = IScriptAPIDispatcher,
 	weak__script_manager = IScriptManager,
 	weak__sig_factory = ScriptSigFactory,
 	_forbid_post_api = false,
+	_waiting_sig_logic = IScriptSigLogic,
 }
 
-function ScriptAPIManager:ctor(api_dispatcher, script_manager, sig_factory)
+function ScriptAPIManager:__ctor(api_dispatcher, script_manager, sig_factory)
 	self._api_proxy_map = {}
 	self._script_api_space = setmetatable({}, 
 		{__index = self._api_proxy_map, __newindex = function() error("read only") end})
@@ -183,7 +189,6 @@ end
 function ScriptAPIManager:_built_in_waitEvent(expression, time_out)
 	-- 使脚本等待事件信号
 	local event_logic_func = _createEventLogic(self._sig_factory, expression)
-	print("test", event_logic_func)
 	return self:_waitSig(SSL_Event, event_logic_func, time_out)
 end
 
@@ -192,7 +197,9 @@ for k, v in pairs(ScriptAPIManager) do
 	if "function" == type(v) then
 		local api_name = k:match("^_built_in_(.+)")
 		if api_name then
-			_log("built in api:", api_name)
+			if _LOG_ON then
+				print("[ScriptAPIManager] 内建API:", api_name)
+			end
 			_built_in_apis[api_name] = v
 		end
 	end
@@ -200,13 +207,12 @@ end
 ------- [代码区段结束] 内建API ---------<
 
 function ScriptAPIManager:_waitSig(sig_logic_class, ...)
-	local sig_logic = new(sig_logic_class, self._sig_factory, ...)
-	self._script_manager:_scriptWait(sig_logic)
+	self._waiting_sig_logic = new(sig_logic_class, self._sig_factory, ...)
+	_friendCall(self._script_manager, "_scriptWait", self._waiting_sig_logic)
 
 	-- 返回的sig_logic和等待的是同一个
-	local is_time_out = sig_logic.is_time_out
-	delete(sig_logic)
-	sig_logic = nil
+	local is_time_out = self._waiting_sig_logic.is_time_out
+	self._waiting_sig_logic = nil
 	return not is_time_out
 end
 

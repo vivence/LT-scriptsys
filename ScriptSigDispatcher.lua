@@ -1,4 +1,9 @@
 
+local new = typesys.new
+
+local function _friendCall(self, func_name, ...)
+	return self[func_name](self, ...)
+end
 
 --[[
 脚本信号调度器，负责存储脚本所关注的各类信号逻辑，执行派发信号的逻辑
@@ -9,21 +14,20 @@
 	3. 条件信号
 	4. 事件信号
 --]]
-ScriptSigDispatcher = typesys.ScriptSigDispatcher {
+ScriptSigDispatcher = typesys.def.ScriptSigDispatcher {__super = IScriptSigDispatcher,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = IScriptSigDispatcher,
 	weak__script_manager = IScriptManager,
 	_script_listen_map = typesys.map, -- bug:强引用管理，但是创建却不是在本类
 	_sigs_cache = typesys.map, 
 }
 
-function ScriptSigDispatcher:ctor()
-	self._script_listen_map = typesys.new(typesys.map, type(0), ScriptSigLogic, true) -- weak ref
-	self._sigs_cache = typesys.new(typesys.map, type(""), type(true))
+function ScriptSigDispatcher:__ctor()
+	self._script_listen_map = new(typesys.map, type(0), IScriptSigLogic, true) -- weak ref
+	self._sigs_cache = new(typesys.map, type(""), type(true))
 end
 
-function ScriptSigDispatcher:dtor()
+function ScriptSigDispatcher:__dtor()
 	
 end
 
@@ -38,8 +42,9 @@ function ScriptSigDispatcher:tick(time, delta_time)
 	local script_listen_map = self._script_listen_map
 
 	-- 找到需要触发信号的脚本
-	for script_token, sig_logic in script_listen_map:pairs() do
-		local script = script_manager:_getScriptListeningSig(script_token)
+	for script_token, sig_logic in pairs(script_listen_map) do
+		local script = _friendCall(script_manager, "_getScriptListeningSig", script_token)
+
 		if nil ~= script then
 			local triggered = false
 			if sig_logic:checkTimeOut(time, delta_time) then
@@ -68,7 +73,7 @@ function ScriptSigDispatcher:tick(time, delta_time)
 		-- 将触发信号的脚本从临时table中移除
 		temp_script_listen_map[script] = nil 
 		-- 触发信号
-		script_manager:_scriptOnSig(script, sig_logic)
+		_friendCall(script_manager, "_scriptOnSig", script, sig_logic)
 	end
 end
 

@@ -6,7 +6,7 @@ local _API_STATUS_EXECUTING = 2
 local _API_STATUS_DEAD = 3
 
 ------- [代码区段开始] API接口类 --------->
-IAPISample = typesys.IAPISample {
+IAPISample = typesys.def.IAPISample {
     __pool_capacity = -1,
     __strong_pool = true,
     status = 0,
@@ -22,30 +22,29 @@ function IAPISample:getReturn()
 end
 ------- [代码区段结束] API接口类 ---------<
 
-local function _getAPIToken(api_obj)
-    return api_obj._id
+local function _getAPIToken(self)
+    return self.__id
 end
 
 --[[
 API调度器接口描述，作为API实现的访问入口，负责隐藏API实现和执行的细节
 --]]
-APIDispatcherSample = typesys.APIDispatcherSample {
+APIDispatcherSample = typesys.def.APIDispatcherSample {__super = IScriptAPIDispatcher,
     __pool_capacity = -1,
     __strong_pool = true,
-    __super = IScriptAPIDispatcher,
     weak__script_sys = ScriptSystem,
     _api_map = typesys.map, -- 示例中无限存储，实际中应该要设计销毁机制
     _api_token_list = typesys.array,
     _time = 0, -- 记录时间
 }
 
-function APIDispatcherSample:ctor(script_sys)
+function APIDispatcherSample:__ctor(script_sys)
     self._script_sys = script_sys
     self._api_map = new(typesys.map, type(0), IAPISample)
     self._api_token_list = new(typesys.array, type(0))
 end
 
-function APIDispatcherSample:dtor()
+function APIDispatcherSample:__dtor()
 end
 
 function APIDispatcherSample:tick(time, delta_time)
@@ -72,7 +71,6 @@ function APIDispatcherSample:postAPI(api_name, api_class, ...)
     -- 先缓存api，api通过tick来按顺序执行
     local api_obj = new(api_class, ...)
     local api_token = _getAPIToken(api_obj)
-
     self._api_map:set(api_token, api_obj)
     self._api_token_list:pushBack(api_token)
 

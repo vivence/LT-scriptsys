@@ -1,5 +1,8 @@
 
-local function _log(id, ...) print(string.format("Thread[%d]: ", id), ...) end
+local _LOG_ON = false
+
+local error = error
+local print = print
 local assert = assert
 
 local _STATUS_SUSPENDED = "suspended"
@@ -13,19 +16,26 @@ local _co_status = coroutine.status
 --[[
 线程封装
 --]]
-ScriptThread = typesys.ScriptThread {
+ScriptThread = typesys.def.ScriptThread {
 	__pool_capacity = -1,
 	__strong_pool = true,
-	_co = typesys.unmanaged,   -- 协程
+	_co = typesys.__unmanaged,   -- 协程
 }
 
 local _SIG_ABORT = "abort"
 
-function ScriptThread:ctor()
+function ScriptThread:__ctor()
 end
 
-function ScriptThread:dtor()
+function ScriptThread:__dtor()
 	self:abort()
+end
+
+function ScriptThread:_log(...)
+	if not _LOG_ON then
+		return
+	end
+	print("[thread|]"..self.__id, debug.getinfo(2, "n").name, ...)
 end
 
 ------- [代码区段开始] 接口 --------->
@@ -61,7 +71,7 @@ end
 -- 唤醒为激活状态，返回被调用sleep传入的参数
 function ScriptThread:awake( ... )
 	assert(not self:isActive())
-	_log(self._id, "<awake>")
+	self:_log()
 
 	-- 返回sleep参数，或执行结束
 	return self:_handleResumeResult(_co_resume(self._co, ...))
@@ -70,7 +80,7 @@ end
 -- 使挂起为非激活状态，返回被调用awake传入的参数
 function ScriptThread:sleep( ... )
 	assert(self:isActive())
-	_log(self._id, "<sleep>")
+	self:_log()
 
 	-- 返回awake参数
 	return self:_handleYieldResule(_co_yield(...))
@@ -82,20 +92,19 @@ end
 
 function ScriptThread:_startRunning(proc, ...)
 	assert(not self:isRunning())
+	self:_log()
 
-	_log(self._id, "<start>")
 	self._co = _co_create(proc)
 	return self:_handleResumeResult(_co_resume(self._co, ...))
 end
 
 function ScriptThread:_endRunning(no_error, ...)
 	assert(self:isRunning())
-
 	self._co = nil
 	if no_error then
-		_log(self._id, "<end>", ...)
+		self:_log(...)
 	else
-		_log(self._id, "<error>", ...)
+		self:_log("<错误>", ...)
 	end
 end
 

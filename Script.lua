@@ -1,21 +1,21 @@
 
 local new = typesys.new
 
-Script = typesys.Script {
+Script = typesys.def.Script {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	_name = "",
-	_proc = typesys.unmanaged,
+	_proc = typesys.__unmanaged,
 	_thread = ScriptThread,
 }
 
-function Script:ctor(name, proc)
+function Script:__ctor(name, proc)
 	self._name = name
 	self._proc = proc
 	self._thread = new(ScriptThread)
 end
 
-function Script:dtor()
+function Script:__dtor()
 	self._proc = nil
 end
 

@@ -2,11 +2,10 @@
 g_time = 1
 g_delta_time = 1
 
-local apiTestNumber = typesys.apiTestNumber{
-    __super = IAPISample,
+local apiTestNumber = typesys.def.apiTestNumber{__super = IAPISample,
     num = 0,
 }
-function apiTestNumber:ctor( n )
+function apiTestNumber:__ctor( n )
     self.num = n
 end
 function apiTestNumber:execute()
@@ -17,11 +16,10 @@ function apiTestNumber:getReturn()
     return string.format("testNumber(%d) ok", self.num)
 end
 
-local apiTestString = typesys.apiTestString{
-    __super = IAPISample,
+local apiTestString = typesys.def.apiTestString{__super = IAPISample,
     str = "",
 }
-function apiTestString:ctor( s )
+function apiTestString:__ctor( s )
     self.str = s
 end
 function apiTestString:execute()

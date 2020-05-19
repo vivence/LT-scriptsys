@@ -2,10 +2,14 @@
 
 local new = typesys.new
 
+local function _friendCall(self, func_name, ...)
+	return self[func_name](self, ...)
+end
+
 --[[
 脚本系统，外部只需要使用此类型对象的接口即可
 --]]
-ScriptSystem = typesys.ScriptSystem {
+ScriptSystem = typesys.def.ScriptSystem {
 	__pool_capacity = -1,
 	__strong_pool = true,
 	_api_dispatcher = IScriptAPIDispatcher,
@@ -15,18 +19,18 @@ ScriptSystem = typesys.ScriptSystem {
 	_sig_dispatcher = ScriptSigDispatcher,
 }
 
-function ScriptSystem:ctor(api_dispatcher_class)
+function ScriptSystem:__ctor(api_dispatcher_class)
 	self._api_dispatcher = new(api_dispatcher_class, self)
 	self._script_manager = new(ScriptManager)
 	self._sig_factory = new(ScriptSigFactory)
 	self._sig_dispatcher = new(ScriptSigDispatcher)
 	self._api_manager = new(ScriptAPIManager, self._api_dispatcher, self._script_manager, self._sig_factory)
 
-	self._script_manager:_setSigDispatcher(self._sig_dispatcher)
-	self._sig_dispatcher:_setScriptManager(self._script_manager)
+	_friendCall(self._script_manager, "_setSigDispatcher", self._sig_dispatcher)
+	_friendCall(self._sig_dispatcher, "_setScriptManager", self._script_manager)
 end
 
-function ScriptSystem:dtor()
+function ScriptSystem:__dtor()
 	
 end
 

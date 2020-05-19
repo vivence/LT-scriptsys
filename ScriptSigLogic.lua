@@ -6,24 +6,23 @@
 --]]
 
 ------- [代码区段开始] API信号逻辑 --------->
-SSL_API = typesys.SSL_API {
+SSL_API = typesys.def.SSL_API {__super = IScriptSigLogic,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = ScriptSigLogic,
 	weak__api_dispatcher = IScriptAPIDispatcher,
 	_api_token = 0,
 	_time_out = -1,
 	_sig = "",
 }
 
-function SSL_API:ctor(sig_factory, api_dispatcher, api_token, time_out)
+function SSL_API:__ctor(sig_factory, api_dispatcher, api_token, time_out)
 	self._api_dispatcher = api_dispatcher
 	self._api_token = api_token
 	self._time_out = time_out or self._time_out
 	self._sig = sig_factory:createSig_API(api_token)
 end
 
-function SSL_API:dtor()
+function SSL_API:__dtor()
 	
 end
 
@@ -46,19 +45,18 @@ end
 
 
 ------- [代码区段开始] 计时信号逻辑 --------->
-SSL_Timing = typesys.SSL_Timing {
+SSL_Timing = typesys.def.SSL_Timing {__super = IScriptSigLogic,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = ScriptSigLogic,
 	_time = 0,
 	_time_spent = 0,
 }
 
-function SSL_Timing:ctor(sig_factory, time)
+function SSL_Timing:__ctor(sig_factory, time)
 	self._time = time
 end
 
-function SSL_Timing:dtor()
+function SSL_Timing:__dtor()
 	
 end
 
@@ -82,21 +80,20 @@ end
 但是其难点是：是否要将sigs_set传入condition，如果是这样，那么APi预判中也要构造个空的sigs_set，避免nil访问错误
 同时也有被篡改的风险
 --]]
-SSL_Condition = typesys.SSL_Condition {
+SSL_Condition = typesys.def.SSL_Condition {__super = IScriptSigLogic,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = ScriptSigLogic,
-	_condition = typesys.unmanaged,
+	_condition = typesys.__unmanaged,
 	_time_out = -1,
 	_time_spent = 0,
 }
 
-function SSL_Condition:ctor(sig_factory, condition, time_out)
+function SSL_Condition:__ctor(sig_factory, condition, time_out)
 	self._condition = condition
 	self._time_out = time_out
 end
 
-function SSL_Condition:dtor()
+function SSL_Condition:__dtor()
 	
 end
 
@@ -123,21 +120,20 @@ end
 解析时将事件名转换成sigs_set:containKey(sig)，其中sig是由sig_factory通过事件名创建出来的
 将转换后的代码块构建成一个check函数（参数为sigs_set），在check时进行调用并返回事件是否达成
 --]]
-SSL_Event = typesys.SSL_Event {
+SSL_Event = typesys.def.SSL_Event {__super = IScriptSigLogic,
 	__pool_capacity = -1,
 	__strong_pool = true,
-	__super = ScriptSigLogic,
-	_event_logic_func = typesys.unmanaged,
+	_event_logic_func = typesys.__unmanaged,
 	_time_out = -1,
 	_time_spent = 0,
 }
 
-function SSL_Event:ctor(sig_factory, event_logic_func, time_out)
+function SSL_Event:__ctor(sig_factory, event_logic_func, time_out)
 	self._event_logic_func = event_logic_func
 	self._time_out = time_out
 end
 
-function SSL_Event:dtor()
+function SSL_Event:__dtor()
 	
 end
 
