@@ -12,11 +12,17 @@ local function _sleep(seconds)
 end
 
 package.path = package.path ..';../?.lua;../../lua-typesys/Refactory/?.lua'
+package.path = package.path ..';../../lua-typesys/Refactory/PlantUML/?.lua'
 
 require("TypeSystemHeader")
 require("ScriptSystemHeader")
 require("APIDispatcherSample")
 require("APISample")
+
+-- 输出UML类图
+require("TypesysPlantUML")
+local toPlantUMLSucceed = typesys.tools.toPlantUML("scriptsys.puml")
+print("to plantuml: "..tostring(toPlantUMLSucceed).."\n")
 
 local new = typesys.new
 local gc = typesys.gc
