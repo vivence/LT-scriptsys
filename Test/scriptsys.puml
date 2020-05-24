@@ -1,311 +1,311 @@
 @startuml
 class ScriptSigFactory {
 +createSig_API()
--__ctor()
-{static} -__type_name : string | "ScriptSigFactory"
--__dtor()
 +createSig_Event()
-}
-class ScriptSystem {
--_sig_factory : ScriptSigFactory
--_script_manager : ScriptManager
--_api_dispatcher : IScriptAPIDispatcher
--_api_manager : ScriptAPIManager
--_sig_dispatcher : ScriptSigDispatcher
-+scriptIsRunning()
-+runScript()
-+registerAPI()
-+loadScript()
+{static} -__type_name : string | "ScriptSigFactory"
 -__ctor()
 -__dtor()
-+sendSig_API()
-+registerAssistAPI()
-+abortScript()
-{static} -__type_name : string | "ScriptSystem"
-+sendSig_Event()
-+tick()
-}
-ScriptSystem --> ScriptSigFactory
-ScriptSystem --> ScriptManager
-ScriptSystem --> IScriptAPIDispatcher
-ScriptSystem --> ScriptAPIManager
-ScriptSystem --> ScriptSigDispatcher
-class IScriptAPIDispatcher {
-+apiAbort()
-+apiGetReturn()
--__ctor()
-+apiIsPending()
-{static} -__type_name : string | "IScriptAPIDispatcher"
-+apiDiedOfInterruption()
-+apiIsDead()
-+apiGetTimeSpent()
-+tick()
-+apiIsExecuting()
-+postAPI()
-}
-class SSL_Condition {
--_time_spent : number | 0
--_time_out : number | -1
--_condition : unmanaged
-+check()
-{static} -__super : IScriptSigLogic
--__ctor()
-{static} -__type_name : string | "SSL_Condition"
--__dtor()
-+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Condition 
-class SSL_Event {
--_time_spent : number | 0
--_time_out : number | -1
--_event_logic_func : unmanaged
-+check()
-{static} -__super : IScriptSigLogic
--__ctor()
-{static} -__type_name : string | "SSL_Event"
--__dtor()
-+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Event 
-class IScriptSigDispatcher {
--_unlistenSig()
--__ctor()
-{static} -__type_name : string | "IScriptSigDispatcher"
--_listenSig()
--_setScriptManager()
-}
-class apiTestString {
-+str : string | ""
-+execute()
-{static} -__super : IAPISample
--__ctor()
-{static} -__type_name : string | "apiTestString"
-+getReturn()
-}
-IAPISample <|-- apiTestString 
-class apiTestNumber {
-+num : number | 0
-+execute()
-{static} -__super : IAPISample
--__ctor()
-{static} -__type_name : string | "apiTestNumber"
-+getReturn()
-}
-IAPISample <|-- apiTestNumber 
-class ScriptThread {
--_co : unmanaged
-+start()
--_startRunning()
-+isRunning()
--__ctor()
--__dtor()
--_handleYieldResule()
--_handleResumeResult()
--_endRunning()
-+abort()
-+awake()
-+sleep()
-{static} -__type_name : string | "ScriptThread"
--_log()
-+isActive()
-}
-class IAPISample {
-+post_time : number | 0
-+status : number | 0
-+execute()
-{static} -__type_name : string | "IAPISample"
-+getReturn()
-}
-class APIDispatcherSample {
--_time : number | 0
--_api_token_list : array
--_api_map : map
--_script_sys : ScriptSystem[weak]
-+apiAbort()
-+apiGetReturn()
-{static} -__super : IScriptAPIDispatcher
--__ctor()
--__dtor()
-+apiIsPending()
-+apiDiedOfInterruption()
-+apiIsDead()
-+tick()
-+apiGetTimeSpent()
-{static} -__type_name : string | "APIDispatcherSample"
-+apiIsExecuting()
-+postAPI()
-}
-IScriptAPIDispatcher <|-- APIDispatcherSample 
-APIDispatcherSample --> array
-APIDispatcherSample --> map
-APIDispatcherSample ..> ScriptSystem : weak
-class IScriptSigLogic {
-+is_time_out : boolean | false
--__ctor()
-{static} -__type_name : string | "IScriptSigLogic"
-+check()
-+checkTimeOut()
-}
-class ScriptAPIManager {
--_forbid_post_api : boolean | false
--_waiting_sig_logic : IScriptSigLogic
--_api_dispatcher : IScriptAPIDispatcher[weak]
--_script_manager : IScriptManager[weak]
--_sig_factory : ScriptSigFactory[weak]
--_api_proxy_map : unmanaged
--_script_api_space : unmanaged
-+getAPISpace()
-+registerAPI()
--_waitSig()
--_callAPI()
--_built_in_apiIsExecuting()
-+registerAssistAPI()
--_built_in_waitCondition()
--_built_in_waitEvent()
--_built_in_apiIsDead()
--_built_in_apiAbort()
--_built_in_apiGetTimeSpent()
--__ctor()
--_built_in_apiIsPending()
--_built_in_delay()
--_built_in_apiGetReturn()
--_registerBuiltInAPI()
-{static} -__type_name : string | "ScriptAPIManager"
--_built_in_apiWait()
--_built_in_apiDiedOfInterruption()
-}
-ScriptAPIManager --> IScriptSigLogic
-ScriptAPIManager ..> IScriptAPIDispatcher : weak
-ScriptAPIManager ..> IScriptManager : weak
-ScriptAPIManager ..> ScriptSigFactory : weak
-class IScriptManager {
--_scriptWait()
--_scriptOnSig()
--__ctor()
--_setSigDispatcher()
--_getScriptListeningSig()
-{static} -__type_name : string | "IScriptManager"
 }
 class ScriptSigDispatcher {
 -_sigs_cache : map
 -_script_listen_map : map
 -_script_manager : IScriptManager[weak]
 -_unlistenSig()
-{static} -__super : IScriptSigDispatcher
--__ctor()
+{static} -__type_name : string | "ScriptSigDispatcher"
 -__dtor()
 -_listenSig()
 -_setScriptManager()
-+tick()
 +sendSig()
-{static} -__type_name : string | "ScriptSigDispatcher"
+-__ctor()
++tick()
+{static} -__super : IScriptSigDispatcher
 }
 IScriptSigDispatcher <|-- ScriptSigDispatcher 
 ScriptSigDispatcher --> map
 ScriptSigDispatcher ..> IScriptManager : weak
 class ScriptManager {
 -_script_map : map
--_active_script : Script[weak]
 -_sig_dispatcher : IScriptSigDispatcher[weak]
-+scriptIsRunning()
-+runScript()
-{static} -__super : IScriptManager
--_setSigDispatcher()
+-_active_script : Script[weak]
 +abortScript()
 -_scriptWait()
-+scriptIsActive()
--_sleepScript()
--_unsetActiveScript()
--__ctor()
--_handleScriptTickResult()
--_awakeScript()
--_setActiveScript()
--_handleScriptAwakeArgs()
--_abortScript()
-+loadScript()
--_scriptOnSig()
+-_setSigDispatcher()
 -__dtor()
-{static} -__type_name : string | "ScriptManager"
++scriptIsActive()
++scriptIsRunning()
+-__ctor()
 -_runScript()
++runScript()
 -_getScriptListeningSig()
+-_awakeScript()
+-_handleScriptAwakeArgs()
+-_unsetActiveScript()
+{static} -__super : IScriptManager
+-_scriptOnSig()
+-_setActiveScript()
+-_abortScript()
+-_handleScriptTickResult()
+-_sleepScript()
++loadScript()
+{static} -__type_name : string | "ScriptManager"
 }
 IScriptManager <|-- ScriptManager 
 ScriptManager --> map
-ScriptManager ..> Script : weak
 ScriptManager ..> IScriptSigDispatcher : weak
-class array {
--_et_type : number | 0
--_a : unmanaged
--_et : unmanaged
-+insert()
-+size()
--__ctor()
-+clear()
--__dtor()
-+peekFront()
-+set()
-+popFront()
-+pushFront()
-+peekBack()
-+popBack()
-{static} -__type_name : string | "array"
-+get()
-+pushBack()
-}
-class map {
--_et_type : number | 0
--_kt : string | ""
--_et : unmanaged
--_m : unmanaged
-+pairs()
-+clear()
--__ctor()
--__dtor()
-+set()
-+isEmpty()
--_next()
-{static} -__type_name : string | "map"
-+containKey()
-+get()
-}
-class SSL_API {
--_api_token : number | 0
--_time_out : number | -1
--_sig : string | ""
+ScriptManager ..> Script : weak
+class ScriptAPIManager {
+-_forbid_post_api : boolean | false
+-_waiting_sig_logic : IScriptSigLogic
+-_sig_factory : ScriptSigFactory[weak]
+-_script_manager : IScriptManager[weak]
 -_api_dispatcher : IScriptAPIDispatcher[weak]
-+check()
-{static} -__super : IScriptSigLogic
+-_script_api_space : unmanaged
+-_api_proxy_map : unmanaged
+-_built_in_apiIsExecuting()
+{static} -__type_name : string | "ScriptAPIManager"
+-_built_in_apiIsDead()
+-_built_in_apiAbort()
+-_waitSig()
+-_registerBuiltInAPI()
+-_built_in_apiIsPending()
 -__ctor()
-{static} -__type_name : string | "SSL_API"
--__dtor()
-+checkTimeOut()
++registerAPI()
+-_callAPI()
++registerAssistAPI()
+-_built_in_apiGetTimeSpent()
+-_built_in_waitEvent()
+-_built_in_apiGetReturn()
+-_built_in_waitCondition()
+-_built_in_apiDiedOfInterruption()
+-_built_in_apiWait()
+-_built_in_delay()
++getAPISpace()
 }
-IScriptSigLogic <|-- SSL_API 
-SSL_API ..> IScriptAPIDispatcher : weak
-class SSL_Timing {
--_time : number | 0
--_time_spent : number | 0
-+check()
-{static} -__super : IScriptSigLogic
--__ctor()
-{static} -__type_name : string | "SSL_Timing"
--__dtor()
-+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Timing 
+ScriptAPIManager --> IScriptSigLogic
+ScriptAPIManager ..> ScriptSigFactory : weak
+ScriptAPIManager ..> IScriptManager : weak
+ScriptAPIManager ..> IScriptAPIDispatcher : weak
 class Script {
 -_name : string | ""
 -_thread : ScriptThread
 -_proc : unmanaged
-+sleep()
--__ctor()
--__dtor()
-+abort()
-+awake()
-+isRunning()
 {static} -__type_name : string | "Script"
++sleep()
+-__dtor()
++awake()
++abort()
 +isActive()
+-__ctor()
 +run()
++isRunning()
 }
 Script --> ScriptThread
+class IScriptSigLogic {
++is_time_out : boolean | false
+{static} -__type_name : string | "IScriptSigLogic"
+-__ctor()
++checkTimeOut()
++check()
+}
+class IScriptAPIDispatcher {
++apiAbort()
++apiIsExecuting()
++apiGetTimeSpent()
+{static} -__type_name : string | "IScriptAPIDispatcher"
++apiDiedOfInterruption()
++postAPI()
++apiGetReturn()
++apiIsDead()
+-__ctor()
++tick()
++apiIsPending()
+}
+class map {
+-_et_type : number | 0
+-_kt : string | ""
+-_m : unmanaged
+-_et : unmanaged
++isEmpty()
+{static} -__type_name : string | "map"
+-__dtor()
++containKey()
+-_next()
++set()
++clear()
+-__ctor()
++pairs()
++get()
+}
+class ScriptSystem {
+-_api_dispatcher : IScriptAPIDispatcher
+-_sig_factory : ScriptSigFactory
+-_script_manager : ScriptManager
+-_sig_dispatcher : ScriptSigDispatcher
+-_api_manager : ScriptAPIManager
++registerAPI()
++abortScript()
++runScript()
++loadScript()
+{static} -__type_name : string | "ScriptSystem"
+-__dtor()
++registerAssistAPI()
++scriptIsRunning()
++sendSig_Event()
+-__ctor()
++tick()
++sendSig_API()
+}
+ScriptSystem --> IScriptAPIDispatcher
+ScriptSystem --> ScriptSigFactory
+ScriptSystem --> ScriptManager
+ScriptSystem --> ScriptSigDispatcher
+ScriptSystem --> ScriptAPIManager
+class IScriptSigDispatcher {
+-_setScriptManager()
+-_unlistenSig()
+{static} -__type_name : string | "IScriptSigDispatcher"
+-__ctor()
+-_listenSig()
+}
+class apiTestNumber {
++num : number | 0
+{static} -__super : IAPISample
++getReturn()
++execute()
+{static} -__type_name : string | "apiTestNumber"
+-__ctor()
+}
+IAPISample <|-- apiTestNumber 
+class SSL_Condition {
+-_time_spent : number | 0
+-_time_out : number | -1
+-_condition : unmanaged
+{static} -__super : IScriptSigLogic
++checkTimeOut()
+{static} -__type_name : string | "SSL_Condition"
+-__ctor()
+-__dtor()
++check()
+}
+IScriptSigLogic <|-- SSL_Condition 
+class SSL_Event {
+-_time_spent : number | 0
+-_time_out : number | -1
+-_event_logic_func : unmanaged
+{static} -__super : IScriptSigLogic
++checkTimeOut()
+{static} -__type_name : string | "SSL_Event"
+-__ctor()
+-__dtor()
++check()
+}
+IScriptSigLogic <|-- SSL_Event 
+class array {
+-_et_type : number | 0
+-_a : unmanaged
+-_et : unmanaged
++size()
++clear()
+{static} -__type_name : string | "array"
++pushFront()
+-__dtor()
++peekBack()
++peekFront()
++popFront()
++popBack()
++set()
++pushBack()
+-__ctor()
++insert()
++get()
+}
+class apiTestString {
++str : string | ""
+{static} -__super : IAPISample
++getReturn()
++execute()
+{static} -__type_name : string | "apiTestString"
+-__ctor()
+}
+IAPISample <|-- apiTestString 
+class ScriptThread {
+-_co : unmanaged
++start()
+-_startRunning()
+{static} -__type_name : string | "ScriptThread"
++sleep()
+-__dtor()
+-_log()
++awake()
+-_handleResumeResult()
++abort()
+-_endRunning()
+-_handleYieldResule()
+-__ctor()
++isActive()
++isRunning()
+}
+class SSL_Timing {
+-_time_spent : number | 0
+-_time : number | 0
+{static} -__super : IScriptSigLogic
++checkTimeOut()
+{static} -__type_name : string | "SSL_Timing"
+-__ctor()
+-__dtor()
++check()
+}
+IScriptSigLogic <|-- SSL_Timing 
+class IAPISample {
++status : number | 0
++post_time : number | 0
+{static} -__type_name : string | "IAPISample"
++getReturn()
++execute()
+}
+class APIDispatcherSample {
+-_time : number | 0
+-_api_map : map
+-_api_token_list : array
+-_script_sys : ScriptSystem[weak]
++apiAbort()
++apiIsExecuting()
++apiGetTimeSpent()
+{static} -__type_name : string | "APIDispatcherSample"
++apiDiedOfInterruption()
+-__dtor()
+{static} -__super : IScriptAPIDispatcher
++apiGetReturn()
++apiIsDead()
++apiIsPending()
+-__ctor()
++tick()
++postAPI()
+}
+IScriptAPIDispatcher <|-- APIDispatcherSample 
+APIDispatcherSample --> map
+APIDispatcherSample --> array
+APIDispatcherSample ..> ScriptSystem : weak
+class SSL_API {
+-_time_out : number | -1
+-_api_token : number | 0
+-_sig : string | ""
+-_api_dispatcher : IScriptAPIDispatcher[weak]
+{static} -__super : IScriptSigLogic
++checkTimeOut()
+{static} -__type_name : string | "SSL_API"
+-__ctor()
+-__dtor()
++check()
+}
+IScriptSigLogic <|-- SSL_API 
+SSL_API ..> IScriptAPIDispatcher : weak
+class IScriptManager {
+-_scriptOnSig()
+-_getScriptListeningSig()
+-_scriptWait()
+-_setSigDispatcher()
+{static} -__type_name : string | "IScriptManager"
+-__ctor()
+}
 @enduml
