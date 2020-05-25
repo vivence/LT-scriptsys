@@ -60,10 +60,20 @@ function Game:run()
     until not script_sys:scriptIsRunning(script_token)
 end
 
-g_game = new(Game)
-setRootObject(g_game)
+-- true：生成puml脚本
+local generate_puml = false
 
-g_game:run()
+if not generate_puml then
+    g_game = new(Game)
+    setRootObject(g_game)
 
-setRootObject(nil)
-g_game = nil
+    g_game:run()
+
+    setRootObject(nil)
+    g_game = nil
+else
+    package.path = package.path ..';../../lua-typesys/Refactory/PlantUML/?.lua'
+    require("TypesysPlantUML")
+    local toPlantUMLSucceed = typesys.tools.toPlantUML("Game.puml")
+    print("to plantuml: "..tostring(toPlantUMLSucceed).."\n")
+end
