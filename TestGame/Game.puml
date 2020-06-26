@@ -1,211 +1,4 @@
 @startuml
-class ScriptSystem {
-	-_script_manager : ScriptManager
-	-_sig_dispatcher : ScriptSigDispatcher
-	-_api_manager : ScriptAPIManager
-	-_sig_factory : ScriptSigFactory
-	-_api_dispatcher : IScriptAPIDispatcher
-	+sendSig_Event()
-	{static} -__type_name : string | "ScriptSystem"
-	+registerAPI()
-	+sendSig_API()
-	-__dtor()
-	+scriptIsRunning()
-	+abortScript()
-	+runScript()
-	+tick()
-	-__ctor()
-	+loadScript()
-	+registerAssistAPI()
-}
-ScriptSystem --> ScriptManager
-ScriptSystem --> ScriptSigDispatcher
-ScriptSystem --> ScriptAPIManager
-ScriptSystem --> ScriptSigFactory
-ScriptSystem --> IScriptAPIDispatcher
-class IScriptSigLogic {
-	+is_time_out : boolean | false
-	+checkTimeOut()
-	-__ctor()
-	+check()
-	{static} -__type_name : string | "IScriptSigLogic"
-}
-class ScriptManager {
-	-_script_map : map
-	-_sig_dispatcher : IScriptSigDispatcher[weak]
-	-_active_script : Script[weak]
-	+runScript()
-	-_runScript()
-	-_scriptWait()
-	-__dtor()
-	-_unsetActiveScript()
-	-_getScriptListeningSig()
-	-_handleScriptTickResult()
-	-_setSigDispatcher()
-	{static} -__type_name : string | "ScriptManager"
-	-_scriptOnSig()
-	-_setActiveScript()
-	-_sleepScript()
-	+loadScript()
-	+scriptIsActive()
-	+scriptIsRunning()
-	-_abortScript()
-	-_awakeScript()
-	{static} -__super : IScriptManager
-	+abortScript()
-	-_handleScriptAwakeArgs()
-	-__ctor()
-}
-IScriptManager <|-- ScriptManager 
-ScriptManager --> map
-ScriptManager ..> IScriptSigDispatcher : weak
-ScriptManager ..> Script : weak
-class ScriptThread {
-	-_co : unmanaged
-	+sleep()
-	{static} -__type_name : string | "ScriptThread"
-	-_log()
-	+abort()
-	+start()
-	-_endRunning()
-	-__dtor()
-	-_startRunning()
-	+awake()
-	+isActive()
-	+isRunning()
-	-__ctor()
-	-_handleYieldResule()
-	-_handleResumeResult()
-}
-class SSL_Condition {
-	-_time_spent : number | 0
-	-_time_out : number | -1
-	-_condition : unmanaged
-	-__dtor()
-	{static} -__type_name : string | "SSL_Condition"
-	{static} -__super : IScriptSigLogic
-	-__ctor()
-	+check()
-	+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Condition 
-class IScriptSigDispatcher {
-	-_setScriptManager()
-	{static} -__type_name : string | "IScriptSigDispatcher"
-	-__ctor()
-	-_unlistenSig()
-	-_listenSig()
-}
-class Script {
-	-_name : string | ""
-	-_thread : ScriptThread
-	-_proc : unmanaged
-	{static} -__type_name : string | "Script"
-	+abort()
-	-__dtor()
-	+awake()
-	+isActive()
-	+isRunning()
-	-__ctor()
-	+sleep()
-	+run()
-}
-Script --> ScriptThread
-class Game {
-	+enviroment : GameEnviroment
-	+script_sys : ScriptSystem
-	-__ctor()
-	+run()
-	{static} -__type_name : string | "Game"
-}
-Game --> GameEnviroment
-Game --> ScriptSystem
-class apiMoveBack {
-	+moved_steps : number | 0
-	+steps : number | 0
-	{static} -__type_name : string | "apiMoveBack"
-	{static} -__super : IGameAPI
-	-__ctor()
-	+getReturn()
-	+execute()
-}
-IGameAPI <|-- apiMoveBack 
-class apiOpenBox {
-	+ex_chance : number | 0
-	+bonus : number | 0
-	+open_times : number | 0
-	{static} -__super : IGameAPI
-	+getReturn()
-	+execute()
-	{static} -__type_name : string | "apiOpenBox"
-}
-IGameAPI <|-- apiOpenBox 
-class apiMoveForward {
-	+moved_steps : number | 0
-	+steps : number | 0
-	{static} -__type_name : string | "apiMoveForward"
-	{static} -__super : IGameAPI
-	-__ctor()
-	+getReturn()
-	+execute()
-}
-IGameAPI <|-- apiMoveForward 
-class apiInitGame {
-	+space_size : number | 0
-	+chance : number | 0
-	+goal_bonus : number | 0
-	{static} -__type_name : string | "apiInitGame"
-	{static} -__super : IGameAPI
-	-__ctor()
-	+getReturn()
-	+execute()
-}
-IGameAPI <|-- apiInitGame 
-class GameAPIDispatcher {
-	-_time : number | 0
-	-_api_token_list : array
-	-_api_map : map
-	-_script_sys : ScriptSystem[weak]
-	+apiIsExecuting()
-	+apiIsPending()
-	+postAPI()
-	+apiIsDead()
-	+apiDiedOfInterruption()
-	+apiGetTimeSpent()
-	-__dtor()
-	{static} -__super : IScriptAPIDispatcher
-	+apiGetReturn()
-	+tick()
-	-__ctor()
-	{static} -__type_name : string | "GameAPIDispatcher"
-	+apiAbort()
-}
-IScriptAPIDispatcher <|-- GameAPIDispatcher 
-GameAPIDispatcher --> array
-GameAPIDispatcher --> map
-GameAPIDispatcher ..> ScriptSystem : weak
-class GameEnviroment {
-	+rest_chance : number | 0
-	+goal_bonus : number | 0
-	+pos : number | 1
-	+space : array
-	+opened_pos_map : map
-	+openBox()
-	{static} -__type_name : string | "GameEnviroment"
-	-__ctor()
-	+moveBack()
-	+moveForward()
-}
-GameEnviroment --> array
-GameEnviroment --> map
-class SpectialBonusBox {
-	-_chance : number | 0
-	{static} -__super : BonusBox
-	-__ctor()
-	+getChance()
-	{static} -__type_name : string | "SpectialBonusBox"
-}
-BonusBox <|-- SpectialBonusBox 
 class BonusBox {
 	-_bonus : number | 0
 	-_open_times : number | 0
@@ -214,6 +7,265 @@ class BonusBox {
 	+open()
 	{static} -__type_name : string | "BonusBox"
 }
+class ScriptThread {
+	-_co : unmanaged
+	+sleep()
+	-_log()
+	+isActive()
+	+isRunning()
+	-_handleResumeResult()
+	-_endRunning()
+	+abort()
+	+start()
+	-_handleYieldResule()
+	{static} -__type_name : string | "ScriptThread"
+	-_startRunning()
+	-__ctor()
+	-__dtor()
+	+awake()
+}
+class IScriptAPIDispatcher {
+	+postAPI()
+	+apiIsDead()
+	+apiAbort()
+	+apiGetTimeSpent()
+	+apiGetReturn()
+	+apiDiedOfInterruption()
+	+apiIsPending()
+	+apiIsExecuting()
+	-__ctor()
+	+tick()
+	{static} -__type_name : string | "IScriptAPIDispatcher"
+}
+class IScriptSigLogic {
+	+is_time_out : boolean | false
+	+checkTimeOut()
+	-__ctor()
+	+check()
+	{static} -__type_name : string | "IScriptSigLogic"
+}
+class ScriptAPIManager {
+	-_forbid_post_api : boolean | false
+	-_waiting_sig_logic : IScriptSigLogic
+	-_api_dispatcher : IScriptAPIDispatcher[weak]
+	-_sig_factory : ScriptSigFactory[weak]
+	-_script_manager : IScriptManager[weak]
+	-_script_api_space : unmanaged
+	-_api_proxy_map : unmanaged
+	-_built_in_apiDiedOfInterruption()
+	-_built_in_delay()
+	-_built_in_apiAbort()
+	-_built_in_apiGetReturn()
+	+registerAPI()
+	-_built_in_apiIsDead()
+	-__ctor()
+	-_built_in_apiGetTimeSpent()
+	-_built_in_apiIsExecuting()
+	-_registerBuiltInAPI()
+	-_waitSig()
+	+getAPISpace()
+	-_callAPI()
+	-_built_in_apiIsPending()
+	{static} -__type_name : string | "ScriptAPIManager"
+	+registerAssistAPI()
+	-_built_in_waitCondition()
+	-_built_in_apiWait()
+	-_built_in_waitEvent()
+}
+ScriptAPIManager --> IScriptSigLogic
+ScriptAPIManager ..> IScriptAPIDispatcher : weak
+ScriptAPIManager ..> ScriptSigFactory : weak
+ScriptAPIManager ..> IScriptManager : weak
+class array {
+	-_et_type : number | 0
+	-_a : unmanaged
+	-_et : unmanaged
+	+pushFront()
+	+clear()
+	+size()
+	+popBack()
+	+peekFront()
+	+popFront()
+	-__dtor()
+	+get()
+	+peekBack()
+	{static} -__type_name : string | "array"
+	+pushBack()
+	-__ctor()
+	+insert()
+	+set()
+}
+class map {
+	-_et_type : number | 0
+	-_kt : string | ""
+	-_m : unmanaged
+	-_et : unmanaged
+	-_next()
+	+clear()
+	+containKey()
+	-__dtor()
+	+get()
+	{static} -__type_name : string | "map"
+	-__ctor()
+	+set()
+	+isEmpty()
+	+pairs()
+}
+class IScriptSigDispatcher {
+	{static} -__type_name : string | "IScriptSigDispatcher"
+	-_unlistenSig()
+	-_setScriptManager()
+	-_listenSig()
+	-__ctor()
+}
+class GameAPIDispatcher {
+	-_time : number | 0
+	-_api_map : map
+	-_api_token_list : array
+	-_script_sys : ScriptSystem[weak]
+	+postAPI()
+	+apiAbort()
+	+apiGetTimeSpent()
+	+apiIsDead()
+	+apiDiedOfInterruption()
+	-__dtor()
+	+apiGetReturn()
+	+apiIsExecuting()
+	{static} -__type_name : string | "GameAPIDispatcher"
+	+apiIsPending()
+	-__ctor()
+	+tick()
+	{static} -__super : IScriptAPIDispatcher
+}
+IScriptAPIDispatcher <|-- GameAPIDispatcher 
+GameAPIDispatcher --> map
+GameAPIDispatcher --> array
+GameAPIDispatcher ..> ScriptSystem : weak
+class apiMoveBack {
+	+steps : number | 0
+	+moved_steps : number | 0
+	+execute()
+	{static} -__type_name : string | "apiMoveBack"
+	-__ctor()
+	{static} -__super : IGameAPI
+	+getReturn()
+}
+IGameAPI <|-- apiMoveBack 
+class apiMoveForward {
+	+steps : number | 0
+	+moved_steps : number | 0
+	+execute()
+	{static} -__type_name : string | "apiMoveForward"
+	-__ctor()
+	{static} -__super : IGameAPI
+	+getReturn()
+}
+IGameAPI <|-- apiMoveForward 
+class Game {
+	+script_sys : ScriptSystem
+	+enviroment : GameEnviroment
+	-__ctor()
+	+run()
+	{static} -__type_name : string | "Game"
+}
+Game --> ScriptSystem
+Game --> GameEnviroment
+class Script {
+	-_name : string | ""
+	-_thread : ScriptThread
+	-_proc : unmanaged
+	+sleep()
+	+isActive()
+	+isRunning()
+	+abort()
+	+run()
+	-__dtor()
+	-__ctor()
+	{static} -__type_name : string | "Script"
+	+awake()
+}
+Script --> ScriptThread
+class SSL_API {
+	-_time_out : number | -1
+	-_api_token : number | 0
+	-_sig : string | ""
+	-_api_dispatcher : IScriptAPIDispatcher[weak]
+	-__dtor()
+	{static} -__type_name : string | "SSL_API"
+	+checkTimeOut()
+	-__ctor()
+	{static} -__super : IScriptSigLogic
+	+check()
+}
+IScriptSigLogic <|-- SSL_API 
+SSL_API ..> IScriptAPIDispatcher : weak
+class SpectialBonusBox {
+	-_chance : number | 0
+	+getChance()
+	-__ctor()
+	{static} -__super : BonusBox
+	{static} -__type_name : string | "SpectialBonusBox"
+}
+BonusBox <|-- SpectialBonusBox 
+class apiInitGame {
+	+goal_bonus : number | 0
+	+chance : number | 0
+	+space_size : number | 0
+	+execute()
+	{static} -__type_name : string | "apiInitGame"
+	-__ctor()
+	{static} -__super : IGameAPI
+	+getReturn()
+}
+IGameAPI <|-- apiInitGame 
+class GameEnviroment {
+	+pos : number | 1
+	+rest_chance : number | 0
+	+goal_bonus : number | 0
+	+opened_pos_map : map
+	+space : array
+	+moveBack()
+	+openBox()
+	{static} -__type_name : string | "GameEnviroment"
+	+moveForward()
+	-__ctor()
+}
+GameEnviroment --> map
+GameEnviroment --> array
+class SSL_Condition {
+	-_time_out : number | -1
+	-_time_spent : number | 0
+	-_condition : unmanaged
+	-__dtor()
+	{static} -__type_name : string | "SSL_Condition"
+	+checkTimeOut()
+	-__ctor()
+	{static} -__super : IScriptSigLogic
+	+check()
+}
+IScriptSigLogic <|-- SSL_Condition 
+class apiOpenBox {
+	+open_times : number | 0
+	+bonus : number | 0
+	+ex_chance : number | 0
+	+getReturn()
+	+execute()
+	{static} -__super : IGameAPI
+	{static} -__type_name : string | "apiOpenBox"
+}
+IGameAPI <|-- apiOpenBox 
+class SSL_Event {
+	-_time_out : number | -1
+	-_time_spent : number | 0
+	-_event_logic_func : unmanaged
+	-__dtor()
+	{static} -__type_name : string | "SSL_Event"
+	+checkTimeOut()
+	-__ctor()
+	{static} -__super : IScriptSigLogic
+	+check()
+}
+IScriptSigLogic <|-- SSL_Event 
 class IGameAPI {
 	+post_time : number | 0
 	+status : number | 0
@@ -221,153 +273,101 @@ class IGameAPI {
 	+execute()
 	{static} -__type_name : string | "IGameAPI"
 }
-class SSL_Timing {
-	-_time : number | 0
-	-_time_spent : number | 0
-	-__dtor()
-	{static} -__type_name : string | "SSL_Timing"
-	{static} -__super : IScriptSigLogic
-	-__ctor()
-	+check()
-	+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Timing 
-class SSL_API {
-	-_api_token : number | 0
-	-_time_out : number | -1
-	-_sig : string | ""
-	-_api_dispatcher : IScriptAPIDispatcher[weak]
-	-__dtor()
-	{static} -__type_name : string | "SSL_API"
-	{static} -__super : IScriptSigLogic
-	-__ctor()
-	+check()
-	+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_API 
-SSL_API ..> IScriptAPIDispatcher : weak
-class IScriptAPIDispatcher {
-	+apiIsExecuting()
-	+apiIsPending()
-	+postAPI()
-	+apiIsDead()
-	+apiDiedOfInterruption()
-	+apiGetTimeSpent()
-	{static} -__type_name : string | "IScriptAPIDispatcher"
-	+tick()
-	-__ctor()
-	+apiGetReturn()
-	+apiAbort()
-}
-class ScriptAPIManager {
-	-_forbid_post_api : boolean | false
-	-_waiting_sig_logic : IScriptSigLogic
-	-_script_manager : IScriptManager[weak]
-	-_api_dispatcher : IScriptAPIDispatcher[weak]
-	-_sig_factory : ScriptSigFactory[weak]
-	-_api_proxy_map : unmanaged
-	-_script_api_space : unmanaged
-	-_built_in_apiWait()
-	-_built_in_apiIsPending()
-	-_built_in_waitEvent()
-	-_built_in_waitCondition()
-	-_built_in_delay()
-	-_built_in_apiGetReturn()
-	-_callAPI()
-	{static} -__type_name : string | "ScriptAPIManager"
+class ScriptSystem {
+	-_script_manager : ScriptManager
+	-_api_dispatcher : IScriptAPIDispatcher
+	-_sig_dispatcher : ScriptSigDispatcher
+	-_sig_factory : ScriptSigFactory
+	-_api_manager : ScriptAPIManager
+	+sendSig_Event()
+	+runScript()
+	+sendSig_API()
+	+scriptIsRunning()
 	+registerAPI()
-	-_built_in_apiGetTimeSpent()
-	-_waitSig()
-	+getAPISpace()
-	-_built_in_apiAbort()
-	-_built_in_apiDiedOfInterruption()
-	-_built_in_apiIsDead()
-	-_registerBuiltInAPI()
-	-_built_in_apiIsExecuting()
-	-__ctor()
+	-__dtor()
+	+loadScript()
+	{static} -__type_name : string | "ScriptSystem"
 	+registerAssistAPI()
-}
-ScriptAPIManager --> IScriptSigLogic
-ScriptAPIManager ..> IScriptManager : weak
-ScriptAPIManager ..> IScriptAPIDispatcher : weak
-ScriptAPIManager ..> ScriptSigFactory : weak
-class IScriptManager {
-	-_setSigDispatcher()
-	{static} -__type_name : string | "IScriptManager"
-	-_scriptOnSig()
 	-__ctor()
-	-_scriptWait()
-	-_getScriptListeningSig()
-}
-class SSL_Event {
-	-_time_spent : number | 0
-	-_time_out : number | -1
-	-_event_logic_func : unmanaged
-	-__dtor()
-	{static} -__type_name : string | "SSL_Event"
-	{static} -__super : IScriptSigLogic
-	-__ctor()
-	+check()
-	+checkTimeOut()
-}
-IScriptSigLogic <|-- SSL_Event 
-class map {
-	-_et_type : number | 0
-	-_kt : string | ""
-	-_et : unmanaged
-	-_m : unmanaged
-	+containKey()
-	+isEmpty()
-	-__dtor()
-	+get()
-	-_next()
-	+pairs()
-	+clear()
-	-__ctor()
-	{static} -__type_name : string | "map"
-	+set()
-}
-class ScriptSigFactory {
-	-__dtor()
-	+createSig_API()
-	{static} -__type_name : string | "ScriptSigFactory"
-	-__ctor()
-	+createSig_Event()
-}
-class ScriptSigDispatcher {
-	-_sigs_cache : map
-	-_script_listen_map : map
-	-_script_manager : IScriptManager[weak]
-	-_setScriptManager()
-	{static} -__type_name : string | "ScriptSigDispatcher"
-	-_unlistenSig()
-	-__dtor()
-	-_listenSig()
 	+tick()
+	+abortScript()
+}
+ScriptSystem --> ScriptManager
+ScriptSystem --> IScriptAPIDispatcher
+ScriptSystem --> ScriptSigDispatcher
+ScriptSystem --> ScriptSigFactory
+ScriptSystem --> ScriptAPIManager
+class ScriptSigDispatcher {
+	-_script_listen_map : map
+	-_sigs_cache : map
+	-_script_manager : IScriptManager[weak]
 	+sendSig()
-	{static} -__super : IScriptSigDispatcher
+	-__dtor()
+	-_unlistenSig()
+	-_listenSig()
+	{static} -__type_name : string | "ScriptSigDispatcher"
+	-_setScriptManager()
 	-__ctor()
+	+tick()
+	{static} -__super : IScriptSigDispatcher
 }
 IScriptSigDispatcher <|-- ScriptSigDispatcher 
 ScriptSigDispatcher --> map
 ScriptSigDispatcher ..> IScriptManager : weak
-class array {
-	-_et_type : number | 0
-	-_a : unmanaged
-	-_et : unmanaged
-	+pushBack()
-	{static} -__type_name : string | "array"
-	+clear()
-	+peekFront()
-	+insert()
-	+popBack()
+class ScriptSigFactory {
 	-__dtor()
-	+get()
-	+popFront()
-	+pushFront()
-	+peekBack()
+	{static} -__type_name : string | "ScriptSigFactory"
+	+createSig_API()
+	+createSig_Event()
 	-__ctor()
-	+size()
-	+set()
 }
+class ScriptManager {
+	-_script_map : map
+	-_active_script : Script[weak]
+	-_sig_dispatcher : IScriptSigDispatcher[weak]
+	+scriptIsRunning()
+	-_getScriptListeningSig()
+	-_awakeScript()
+	-__ctor()
+	-_handleScriptAwakeArgs()
+	-_unsetActiveScript()
+	-_abortScript()
+	-_scriptOnSig()
+	-_setSigDispatcher()
+	-_runScript()
+	-_handleScriptTickResult()
+	-_setActiveScript()
+	-_sleepScript()
+	-__dtor()
+	-_scriptWait()
+	+loadScript()
+	{static} -__type_name : string | "ScriptManager"
+	+scriptIsActive()
+	+runScript()
+	{static} -__super : IScriptManager
+	+abortScript()
+}
+IScriptManager <|-- ScriptManager 
+ScriptManager --> map
+ScriptManager ..> Script : weak
+ScriptManager ..> IScriptSigDispatcher : weak
+class IScriptManager {
+	-_scriptOnSig()
+	{static} -__type_name : string | "IScriptManager"
+	-_getScriptListeningSig()
+	-__ctor()
+	-_setSigDispatcher()
+	-_scriptWait()
+}
+class SSL_Timing {
+	-_time_spent : number | 0
+	-_time : number | 0
+	-__dtor()
+	{static} -__type_name : string | "SSL_Timing"
+	+checkTimeOut()
+	-__ctor()
+	{static} -__super : IScriptSigLogic
+	+check()
+}
+IScriptSigLogic <|-- SSL_Timing 
 @enduml

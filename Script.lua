@@ -39,11 +39,11 @@ function Script:abort()
 end
 
 function Script:isRunning()
-	return nil ~= self._thread and self._thread:isRunning()
+	return self._thread:isRunning()
 end
 
 function Script:isActive()
-	return nil ~= self._thread and self._thread:isActive()
+	return self._thread:isActive()
 end
 
 

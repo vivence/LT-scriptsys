@@ -11,7 +11,7 @@ local function _sleep(seconds)
     os.execute(str)
 end
 
-package.path = package.path ..';../?.lua;../../lua-typesys/Refactory/?.lua'
+package.path = package.path ..';../?.lua;../../lua-typesys/?.lua'
 
 require("TypeSystemHeader")
 require("ScriptSystemHeader")
@@ -61,7 +61,7 @@ function Game:run()
 end
 
 -- true：生成puml脚本
-local generate_puml = false
+local generate_puml = true
 
 if not generate_puml then
     g_game = new(Game)
@@ -72,7 +72,7 @@ if not generate_puml then
     setRootObject(nil)
     g_game = nil
 else
-    package.path = package.path ..';../../lua-typesys/Refactory/PlantUML/?.lua'
+    package.path = package.path ..';../../lua-typesys/PlantUML/?.lua'
     require("TypesysPlantUML")
     local toPlantUMLSucceed = typesys.tools.toPlantUML("Game.puml")
     print("to plantuml: "..tostring(toPlantUMLSucceed).."\n")
