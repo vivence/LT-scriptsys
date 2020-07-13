@@ -1,14 +1,24 @@
 
-require('io')
+require("io")
 
-local sleep_map = {}
-local function _sleep(seconds)
-    local str = sleep_map[seconds]
-    if nil == str then
-        str = 'sleep '..seconds
-        sleep_map[seconds] = str
+local OS_Win = false -- 设置操作系统是否是Windows
+
+local _sleep = nil
+if OS_Win then
+    _sleep = function(seconds)
+        local start_t = os.clock()
+        while os.clock() - start_t <= seconds do end
     end
-    os.execute(str)
+else
+    local sleep_map = {}
+    _sleep = function(seconds)
+        local str = sleep_map[seconds]
+        if nil == str then
+            str = "sleep "..seconds
+            sleep_map[seconds] = str
+        end
+        os.execute(str)
+    end
 end
 
 package.path = package.path ..';../?.lua;../../lua-typesys/?.lua'
@@ -61,7 +71,7 @@ function Game:run()
 end
 
 -- true：生成puml脚本
-local generate_puml = true
+local generate_puml = false
 
 if not generate_puml then
     g_game = new(Game)
