@@ -1,5 +1,8 @@
 
 local function _setfenv(fn, env)
+	if nil ~= _G.setfenv then
+		return _G.setfenv(fn, env)
+	end
     local i = 1
     while true do
         local name = debug.getupvalue(fn, i)

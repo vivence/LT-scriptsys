@@ -42,7 +42,7 @@ function ScriptSigDispatcher:tick(time, delta_time)
 	local script_listen_map = self._script_listen_map
 
 	-- 找到需要触发信号的脚本
-	for script_token, sig_logic in pairs(script_listen_map) do
+	for script_token, sig_logic in script_listen_map:pairs() do
 		local script = _friendCall(script_manager, "_getScriptListeningSig", script_token)
 
 		if nil ~= script then
