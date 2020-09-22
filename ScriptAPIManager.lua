@@ -59,7 +59,7 @@ ScriptAPIManager = typesys.def.ScriptAPIManager{
 	weak__script_manager = IScriptManager,
 	weak__sig_factory = ScriptSigFactory,
 	_forbid_post_api = false,
-	_waiting_sig_logic = IScriptSigLogic,
+	_waiting_sig_logic_map = typesys.map,
 }
 
 function ScriptAPIManager:__ctor(api_dispatcher, script_manager, sig_factory)
@@ -70,6 +70,7 @@ function ScriptAPIManager:__ctor(api_dispatcher, script_manager, sig_factory)
 	self._api_dispatcher = api_dispatcher
 	self._script_manager = script_manager
 	self._sig_factory = sig_factory
+	self._waiting_sig_logic_map = new(typesys.map, type(0), IScriptSigLogic)
 
 	self:_registerBuiltInAPI()
 end
@@ -207,12 +208,13 @@ end
 ------- [代码区段结束] 内建API ---------<
 
 function ScriptAPIManager:_waitSig(sig_logic_class, ...)
-	self._waiting_sig_logic = new(sig_logic_class, self._sig_factory, ...)
-	_friendCall(self._script_manager, "_scriptWait", self._waiting_sig_logic)
+	local waiting_sig_logic = new(sig_logic_class, self._sig_factory, ...)
+	self._waiting_sig_logic_map:set(waiting_sig_logic.__id, waiting_sig_logic)
+	_friendCall(self._script_manager, "_scriptWait", waiting_sig_logic)
 
 	-- 返回的sig_logic和等待的是同一个
-	local is_time_out = self._waiting_sig_logic.is_time_out
-	self._waiting_sig_logic = nil
+	local is_time_out = waiting_sig_logic.is_time_out
+	self._waiting_sig_logic_map:set(waiting_sig_logic.__id, nil)
 	return not is_time_out
 end
 
