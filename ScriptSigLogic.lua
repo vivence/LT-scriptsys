@@ -90,7 +90,7 @@ SSL_Condition = typesys.def.SSL_Condition {__super = IScriptSigLogic,
 
 function SSL_Condition:__ctor(sig_factory, condition, time_out)
 	self._condition = condition
-	self._time_out = time_out
+	self._time_out = time_out or self._time_out
 end
 
 function SSL_Condition:__dtor()
@@ -130,7 +130,7 @@ SSL_Event = typesys.def.SSL_Event {__super = IScriptSigLogic,
 
 function SSL_Event:__ctor(sig_factory, event_logic_func, time_out)
 	self._event_logic_func = event_logic_func
-	self._time_out = time_out
+	self._time_out = time_out or self._time_out
 end
 
 function SSL_Event:__dtor()

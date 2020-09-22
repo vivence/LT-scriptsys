@@ -185,7 +185,7 @@ end
 事件名在expression中必须以‘$’字符作为起始，后面只能跟字母、数字和下划线，匹配模式为"%$([%w_]+)"
 --]]
 function _createEventLogic(sig_factory, expression)
-	return load(string.format("local sigs_set=...; return (%s)", _transExp(sig_factory, expression)))
+	return loadstring(string.format("local sigs_set=...; return (%s)", _transExp(sig_factory, expression)))
 end
 function ScriptAPIManager:_built_in_waitEvent(expression, time_out)
 	-- 使脚本等待事件信号
